@@ -27,7 +27,8 @@ public class QuizAttempt {
 
     private Float score;
 
-    @Column(columnDefinition = "LONGTEXT")
+    //@Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "nvarchar(max)")
     private String aiFeedback;
 
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -1,10 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Đăng nhập</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .error { color: red; margin-bottom: 10px; }
+        .success { color: green; margin-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+    </style>
 </head>
 <body>
+<h2>Đăng Nhập Hệ Thống</h2>
 
+<div th:if="${param.error}" class="error">
+    Email hoặc mật khẩu không chính xác!
+</div>
+<div th:if="${param.logout}" class="success">
+    Đã đăng xuất thành công.
+</div>
+
+<form th:action="@{/perform_login}" method="post">
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"
+               th:value="${lastEmail}"
+               required placeholder="nhapemail@example.com" style="width: 300px; padding: 8px;"/>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" name="password" required style="width: 300px; padding: 8px;"/>
+    </div>
+
+    <button type="submit" style="padding: 10px 20px;">Đăng nhập</button>
+</form>
+
+<p style="margin-top: 20px;">
+    Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+</p>
 </body>
 </html>

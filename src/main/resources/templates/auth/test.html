@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"> <title>Test Login Success</title>
+  <style>
+    /* ... code css cũ của bạn ... */
+    body { background-color: #008080; font-family: 'Courier New', monospace; height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; }
+    .win98-window { background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; padding: 4px; width: 600px; }
+    .title-bar { background: linear-gradient(90deg, #000080, #1084d0); color: white; padding: 4px; font-weight: bold; margin-bottom: 10px; }
+    .content { text-align: center; padding: 20px; border: 2px inset #fff; }
+  </style>
+</head>
+<body>
+<div class="win98-window">
+  <div class="title-bar">SYSTEM WARNING - TEST SUCCESS</div>
+  <div class="content">
+    <h1 style="color: red; text-shadow: 2px 2px 0 #000;">ĐĂNG NHẬP THÀNH CÔNG!</h1>
+    <p>Xin chào: <span sec:authentication="name" style="background: yellow;">User</span></p>
+    <p>Đây là trang test.html nằm trong thư mục views</p>
+
+    <form th:action="@{/logout}" method="post">
+      <button style="padding: 10px 20px; font-weight: bold; cursor: pointer;">Đăng xuất</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -18,7 +18,7 @@ public class Lesson {
     private String title;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "nvarchar(max)")
     private String content; // Input cho AI
 
     private Integer orderIndex;

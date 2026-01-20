@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đăng Ký</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .error { color: red; margin-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<h2>Đăng Ký Tài Khoản Mới</h2>
+
+<div th:if="${error}" class="error" th:text="${error}"></div>
+
+<form th:action="@{/register}" th:object="${user}" method="post">
+
+    <div class="form-group">
+        <label>Tên hiển thị (Username):</label>
+        <input type="text" th:field="*{username}" required placeholder="Ví dụ: MinhTriet" style="width: 300px; padding: 8px;"/>
+    </div>
+
+    <div class="form-group">
+        <label>Email (Dùng để đăng nhập):</label>
+        <input type="email" th:field="*{email}" required placeholder="email@domain.com" style="width: 300px; padding: 8px;"/>
+    </div>
+
+    <div class="form-group">
+        <label>Mật khẩu:</label>
+        <input type="password" th:field="*{password}" required style="width: 300px; padding: 8px;"/>
+    </div>
+
+    <div class="form-group">
+        <label>Bạn là:</label>
+        <select th:field="*{role}" style="width: 320px; padding: 8px;">
+            <option value="STUDENT">Học viên (Student)</option>
+            <option value="INSTRUCTOR">Giảng viên (Instructor)</option>
+        </select>
+    </div>
+
+    <button type="submit" style="padding: 10px 20px;">Đăng Ký</button>
+</form>
+
+<p>Đã có tài khoản? <a th:href="@{/login}">Đăng nhập tại đây</a></p>
+</body>
+</html>

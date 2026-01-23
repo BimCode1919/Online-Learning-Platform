@@ -140,7 +140,7 @@ public class StudentController {
 
         if (userOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy user!");
-            return "redirect:views/student/courses";
+            return "redirectstudent/courses";
         }
 
         User user = userOpt.get();

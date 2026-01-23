@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/register").permitAll() // Cho phép truy cập trang login/register
                         .requestMatchers("/instructor/**").hasRole("INSTRUCTOR") // Chỉ Instructor mới vào đc
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/student/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
                         .anyRequest().authenticated() // Còn lại phải đăng nhập
                 )
                 .formLogin(form -> form

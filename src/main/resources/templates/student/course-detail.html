@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.title}">Chi Tiết Khóa Học</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            background: rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .course-info {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .course-info h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .course-info p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .instructor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .lessons-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .lessons-section h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lesson-item {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s, transform 0.2s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+
+        .lesson-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+            border-left-color: #667eea;
+        }
+
+        .lesson-item.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .lesson-info {
+            flex: 1;
+        }
+
+        .lesson-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+
+        .lesson-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .lesson-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .completed-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .start-btn:hover {
+            background: #5568d3;
+        }
+
+        .empty-lessons {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .back-btn {
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Back Button -->
+    <a href="/student/courses" class="back-btn">← Quay lại danh sách</a>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/student/courses">Khóa học</a> / [[${course.title}]]
+    </div>
+
+    <!-- Course Information -->
+    <div class="course-info">
+        <h1 th:text="${course.title}">Tên khóa học</h1>
+        <p th:text="${course.description}">Mô tả khóa học...</p>
+        <div class="instructor-badge" th:if="${course.instructor != null}">
+            👨‍🏫 Giảng viên: <strong>[[${course.instructor.username}]]</strong>
+        </div>
+    </div>
+
+    <!-- Lessons Section -->
+    <div class="lessons-section">
+        <h2>📚 Danh Sách Bài Học</h2>
+
+        <div th:if="${lessons != null and !lessons.isEmpty()}">
+            <div class="lesson-item"
+                 th:each="lesson, iterStat : ${lessons}"
+                 th:classappend="${lesson.orderIndex == 1} ? 'completed' : ''"
+                 th:onclick="'window.location.href=\'/student/lessons/' + ${lesson.id} + '\''">
+
+                <div class="lesson-info">
+                    <span class="lesson-number">[[${iterStat.count}]]</span>
+                    <span class="lesson-title" th:text="${lesson.title}">Tên bài học</span>
+                </div>
+
+                <div class="lesson-actions">
+                        <span class="completed-badge" th:if="${lesson.orderIndex == 1}">
+                            ✓ Đã hoàn thành
+                        </span>
+                    <a th:href="@{/student/lessons/{id}(id=${lesson.id})}"
+                       class="start-btn"
+                       onclick="event.stopPropagation()">
+                        Học ngay →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-lessons" th:if="${lessons == null or lessons.isEmpty()}">
+            <h3>📝 Chưa có bài học nào</h3>
+            <p>Giảng viên đang cập nhật nội dung khóa học. Vui lòng quay lại sau!</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

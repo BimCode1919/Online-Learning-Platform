@@ -32,6 +32,8 @@ public class CourseServiceImpl implements CourseService {
         this.quizAttemptRepository = quizAttemptRepository;
     }
 
+    // --- PHẦN 1: LOGIC CŨ CHO STUDENT (Giữ nguyên) ---
+
     @Override
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -45,12 +47,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Lesson> getLessonsByCourseId(Long courseId) {
         Optional<Course> courseOpt = courseRepository.findById(courseId);
-
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
             return course.getLessons();
         }
-
         return List.of();
     }
 
@@ -62,7 +62,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public boolean isLessonCompletedByUser(Long userId, Long lessonId) {
         Optional<UserProgress> progressOpt = userProgressRepository.findByUserIdAndLessonId(userId, lessonId);
-
         return progressOpt.isPresent() && Boolean.TRUE.equals(progressOpt.get().getIsCompleted());
     }
 
@@ -106,25 +105,18 @@ public class CourseServiceImpl implements CourseService {
                 completedLessons++;
             }
         }
-
         return new CourseProgressDTO(course, totalLessons, completedLessons);
     }
 
     @Override
     public DashboardStatsDTO getDashboardStats(Long userId) {
         DashboardStatsDTO stats = new DashboardStatsDTO();
-
-        // 1. Lấy tất cả courses
         List<Course> allCourses = courseRepository.findAll();
-
-        // 2. Tính progress cho từng course
         List<CourseProgressDTO> coursesProgress = new ArrayList<>();
         int totalLessonsCompleted = 0;
 
         for (Course course : allCourses) {
             CourseProgressDTO progress = getCourseProgress(userId, course.getId());
-
-            // Chỉ add courses mà student đã bắt đầu học (có ít nhất 1 lesson completed)
             if (progress.getCompletedLessons() > 0) {
                 coursesProgress.add(progress);
                 totalLessonsCompleted += progress.getCompletedLessons();
@@ -135,13 +127,11 @@ public class CourseServiceImpl implements CourseService {
         stats.setTotalLessonsCompleted(totalLessonsCompleted);
         stats.setCoursesProgress(coursesProgress);
 
-        // 3. Tính quiz stats (nếu có)
         List<QuizAttempt> quizAttempts = quizAttemptRepository.findAll().stream()
                 .filter(attempt -> attempt.getUser().getId().equals(userId))
                 .toList();
 
         stats.setTotalQuizzesTaken(quizAttempts.size());
-
         if (!quizAttempts.isEmpty()) {
             double avgScore = quizAttempts.stream()
                     .mapToDouble(QuizAttempt::getScore)
@@ -149,7 +139,62 @@ public class CourseServiceImpl implements CourseService {
                     .orElse(0.0);
             stats.setAverageQuizScore(avgScore);
         }
-
         return stats;
+    }
+
+    // --- PHẦN 2: LOGIC MỚI CHO INSTRUCTOR (LUỒNG 1 - ĐÃ SỬA LỖI) ---
+
+    @Override
+    @Transactional
+    public Course createCourse(String title, String description, String instructorEmail) {
+        // 1. Tìm giảng viên qua Email
+        User instructor = userRepository.findByUsername(instructorEmail)
+                .or(() -> userRepository.findByEmail(instructorEmail))
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên với email: " + instructorEmail));
+
+        // 2. Tạo khóa học
+        Course course = new Course();
+        course.setTitle(title);
+        course.setDescription(description);
+        course.setInstructor(instructor);
+
+        return courseRepository.save(course);
+    }
+
+    @Override
+    @Transactional
+    public Lesson addLesson(Long courseId, String title, String content, Integer orderIndex, String instructorEmail) {
+        // 1. Tìm khóa học
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại ID: " + courseId));
+
+        // 2. Bảo mật: Check quyền
+        String ownerEmail = course.getInstructor().getEmail();
+        if (ownerEmail == null) ownerEmail = course.getInstructor().getUsername();
+
+        if (!ownerEmail.equals(instructorEmail)) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa khóa học của người khác!");
+        }
+
+        // 3. Tạo bài học
+        Lesson lesson = new Lesson();
+        lesson.setTitle(title);
+        lesson.setContent(content); // Input cho AI
+
+        int nextOrder = (orderIndex != null) ? orderIndex : (course.getLessons().size() + 1);
+        lesson.setOrderIndex(nextOrder);
+        lesson.setCourse(course);
+
+        return lessonRepository.save(lesson);
+    }
+
+    @Override
+    public List<Course> getCoursesByInstructorEmail(String email) {
+        User instructor = userRepository.findByUsername(email)
+                .or(() -> userRepository.findByEmail(email))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        //Gọi đúng hàm đã khai báo trong Repository
+        return courseRepository.findByInstructorIdOrderByIdDesc(instructor.getId());
     }
 }

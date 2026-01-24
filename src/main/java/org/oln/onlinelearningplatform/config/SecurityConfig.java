@@ -1,6 +1,7 @@
 package org.oln.onlinelearningplatform.config;
 
 import org.oln.onlinelearningplatform.security.CustomAuthenticationFailureHandler;
+import org.oln.onlinelearningplatform.security.CustomAuthenticationSuccessHandler;
 import org.oln.onlinelearningplatform.security.CustomUserDetailsService; // Sẽ tạo ở bước 2
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,9 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -34,7 +38,9 @@ public class SecurityConfig {
                         .loginPage("/login") // URL dẫn đến Controller login
                         .loginProcessingUrl("/perform_login") // URL Spring Security tự xử lý khi submit form
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/", true) // Đăng nhập xong về trang chủ
+                        .successHandler(successHandler) // Giao việc điều hướng cho class CustomAuthenticationSuccessHandler
+                                                        // Nó sẽ kiểm tra cái role rồi điều hướng về trang phù hợp
+
                         //.failureUrl("/login?error=true") // Thất bại thì về lại login kèm lỗi
                         .failureHandler(customAuthenticationFailureHandler) // cho phép tùy chỉnh xử lý lỗi, nghĩa là nhập sai password sẽ lưu email đã nhập vào session
                                                                             //cho phép giữ lại email đã nhập trong form

@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .loginPage("/login") // URL dẫn đến Controller login
                         .loginProcessingUrl("/perform_login") // URL Spring Security tự xử lý khi submit form
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/", true) // Đăng nhập xong về trang chủ
+                        .defaultSuccessUrl("/student/dashboard", true) // Đăng nhập xong về trang chủ
                         //.failureUrl("/login?error=true") // Thất bại thì về lại login kèm lỗi
                         .failureHandler(customAuthenticationFailureHandler) // cho phép tùy chỉnh xử lý lỗi, nghĩa là nhập sai password sẽ lưu email đã nhập vào session
                                                                             //cho phép giữ lại email đã nhập trong form

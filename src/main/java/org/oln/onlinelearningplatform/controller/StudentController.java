@@ -2,6 +2,7 @@ package org.oln.onlinelearningplatform.controller;
 
 
 import org.oln.onlinelearningplatform.entity.Course;
+import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.service.course.CourseService;
@@ -155,5 +156,25 @@ public class StudentController {
 
         // Redirect về trang lesson
         return "redirect:student/lessons/" + lessonId;
+    }
+
+    @GetMapping("/dashboard")
+    public String viewDashboard(Model model,
+                                @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        Optional<User> userOpt = userService.findByUsername(email);
+
+        if (userOpt.isEmpty()) {
+            return "redirect:/login";
+        }
+
+        User user = userOpt.get();
+        model.addAttribute("currentUser", user);
+
+        // Lấy dashboard stats
+        DashboardStatsDTO stats = courseService.getDashboardStats(user.getId());
+        model.addAttribute("stats", stats);
+
+        return "student/dashboard";
     }
 }

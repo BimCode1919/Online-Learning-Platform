@@ -1,6 +1,8 @@
 package org.oln.onlinelearningplatform.service.course;
 
 import org.oln.onlinelearningplatform.entity.Course;
+import org.oln.onlinelearningplatform.entity.CourseProgressDTO;
+import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 
 import java.util.List;
@@ -29,4 +31,19 @@ public interface CourseService {
     // Đánh dấu lesson là đã hoàn thành
 
     void markLessonAsCompleted(Long userId, Long lessonId);
+
+    /**
+     * Lấy progress của user cho một course cụ thể
+     * @param userId ID của student
+     * @param courseId ID của course
+     * @return CourseProgressDTO
+     */
+    CourseProgressDTO getCourseProgress(Long userId, Long courseId);
+
+    /**
+     * Lấy tất cả thống kê dashboard cho student
+     * @param userId ID của student
+     * @return DashboardStatsDTO
+     */
+    DashboardStatsDTO getDashboardStats(Long userId);
 }

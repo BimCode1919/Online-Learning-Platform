@@ -21,45 +21,40 @@ public class AuthController {
         this.userService = userService;
     }
 
-    // --- TRANG LOGIN (Ai cũng vào được) ---
+    // --- TRANG LOGIN ---
     @GetMapping("/login")
     public String loginPage(Model model, HttpSession session) {
-        // Kiểm tra xem có email lưu tạm trong session không (do nhập sai lần trước)
         String lastEmail = (String) session.getAttribute("LAST_EMAIL");
-
         if (lastEmail != null) {
-            // Đưa vào model để HTML hiển thị
             model.addAttribute("lastEmail", lastEmail);
-
-            // Xóa ngay khỏi session để dọn dẹp
             session.removeAttribute("LAST_EMAIL");
         }
-
         return "auth/login";
     }
-    // --- TRANG ĐÍCH SAU KHI LOGIN (Chính là trang Test của bạn) ---
-    // Spring Security sẽ chặn người chưa login ở đây
+
+    // --- TRANG CHỦ ---
     @GetMapping("/")
     public String home() {
-        // Trả về file test.html nằm trong folder templates/auth/
         return "auth/test";
     }
 
+    // --- ADMIN: TẮT DÒNG NÀY ĐỂ KHÔNG BỊ LỖI XUNG ĐỘT (VÌ ĐÃ CÓ AdminController) ---
+    // @GetMapping("/admin/dashboard")
+    // public String adminDashboard() {
+    //     return "views/admin/dashboard";
+    // }
 
-//    @GetMapping("/admin/dashboard")
-//    public String adminDashboard() {
-//        return "views/admin/dashboard"; // Trỏ đúng file html trong folder views/admin
-//    }
-
+    // --- TEACHER: GIỮ NGUYÊN DÒNG NÀY (ĐỂ KHÔNG BỊ LỖI 404) ---
     @GetMapping("/teacher/dashboard")
     public String teacherDashboard() {
-        return "views/teacher/dashboard"; // Trỏ đúng file html trong folder views/teacher
+        return "teacher/dashboard";
     }
 
-    @GetMapping("/student/dashboard")
-    public String studentDashboard() {
-        return "views/student/dashboard"; // Trỏ đúng file html trong folder views/student
-    }
+    // --- STUDENT: TẮT DÒNG NÀY (VÌ ĐÃ CÓ StudentController) ---
+    // @GetMapping("/student/dashboard")
+    // public String studentDashboard() {
+    //    return "views/student/dashboard";
+    // }
 
 
     // --- REGISTER ---

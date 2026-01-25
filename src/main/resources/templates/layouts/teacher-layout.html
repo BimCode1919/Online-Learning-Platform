@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Portal</title>
+    <style>
+        /* CSS dùng chung thống nhất với Student UI */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5; /* Màu nền sáng nhẹ khác Student 1 chút */
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); /* Theme màu xanh Teal cho Teacher */
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar h2 { font-size: 20px; }
+        .navbar a { color: white; text-decoration: none; font-weight: 500; margin-left: 20px; transition: 0.3s; }
+        .navbar a:hover { opacity: 0.8; }
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+
+<div class="navbar">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <h2>👨‍🏫 Instructor Portal</h2>
+        <a th:href="@{/instructor/dashboard}">Dashboard</a>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <span th:if="${#authentication.principal != 'anonymousUser'}">
+            Xin chào, <strong th:text="${#authentication.name}">User</strong>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="logout-btn">Đăng xuất</button>
+        </form>
+    </div>
+</div>
+
+<div layout:fragment="content">
+</div>
 
 </body>
 </html>

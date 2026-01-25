@@ -45,6 +45,23 @@ public class AuthController {
         return "auth/test";
     }
 
+
+//    @GetMapping("/admin/dashboard")
+//    public String adminDashboard() {
+//        return "views/admin/dashboard"; // Trỏ đúng file html trong folder views/admin
+//    }
+
+    @GetMapping("/teacher/dashboard")
+    public String teacherDashboard() {
+        return "views/teacher/dashboard"; // Trỏ đúng file html trong folder views/teacher
+    }
+
+    @GetMapping("/student/dashboard")
+    public String studentDashboard() {
+        return "views/student/dashboard"; // Trỏ đúng file html trong folder views/student
+    }
+
+
     // --- REGISTER ---
     @GetMapping("/register")
     public String registerPage(Model model) {

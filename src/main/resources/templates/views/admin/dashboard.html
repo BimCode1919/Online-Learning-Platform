@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+<h1>CHÀO MỪNG QUẢN TRỊ VIÊN</h1>
+
+<ul>
+    <li><a th:href="@{/admin/users}">>> Quản lý người dùng (User Management)</a></li>
+    <li><a href="#">>> Quản lý khóa học (Chưa làm)</a></li>
+    <li><a href="#">>> Thống kê hệ thống (Chưa làm)</a></li>
+</ul>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Đăng xuất</button>
+</form>
+</body>
+</html>

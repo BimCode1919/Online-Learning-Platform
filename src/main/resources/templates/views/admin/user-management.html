@@ -1,10 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Quản lý người dùng</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 5px 10px; text-decoration: none; color: white; border-radius: 4px; }
+        .btn-danger { background-color: red; }
+        .btn-primary { background-color: blue; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+    </style>
 </head>
 <body>
+
+<div class="header">
+    <h2>Danh Sách Người Dùng Hệ Thống</h2>
+    <div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-primary">Quay về Dashboard</a>
+        <a th:href="@{/admin/users/create}" class="btn btn-primary" style="background-color: green;">+ Thêm mới</a>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Vai trò (Role)</th>
+        <th>Ngày tạo</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}">1</td>
+        <td th:text="${u.username}">MinhTriet</td>
+        <td th:text="${u.email}">triet@gmail.com</td>
+        <td>
+            <span th:if="${u.role == 'ADMIN'}" style="color:red; font-weight:bold">ADMIN</span>
+            <span th:if="${u.role == 'INSTRUCTOR'}" style="color:blue">Giảng viên</span>
+            <span th:if="${u.role == 'STUDENT'}" style="color:green">Học viên</span>
+        </td>
+        <td th:text="${u.createdAt}">2025-01-01</td>
+        <td>
+            <a th:href="@{/admin/users/edit/{id}(id=${u.id})}"
+               class="btn"
+               style="background-color: #ffc107; color: black; margin-right: 5px;">Sửa</a>
+
+            <a th:href="@{/admin/users/delete/{id}(id=${u.id})}"
+               class="btn btn-danger"
+               onclick="return confirm('CẢNH BÁO: Xóa user sẽ mất hết điểm thi và tiến độ học! Bạn chắc chứ?');">Xóa</a>
+        </td>
+
+    </tr>
+    </tbody>
+</table>
 
 </body>
 </html>

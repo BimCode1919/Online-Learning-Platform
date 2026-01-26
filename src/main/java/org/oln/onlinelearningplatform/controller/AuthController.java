@@ -33,10 +33,10 @@ public class AuthController {
     }
 
     // --- TRANG CHỦ ---
-    @GetMapping("/")
-    public String home() {
-        return "auth/test";
-    }
+//    @GetMapping("/")
+//    public String home() {
+//        return "auth/test";
+//    }
 
     // --- ADMIN: TẮT DÒNG NÀY ĐỂ KHÔNG BỊ LỖI XUNG ĐỘT (VÌ ĐÃ CÓ AdminController) ---
     // @GetMapping("/admin/dashboard")
@@ -45,10 +45,10 @@ public class AuthController {
     // }
 
     // --- TEACHER: GIỮ NGUYÊN DÒNG NÀY (ĐỂ KHÔNG BỊ LỖI 404) ---
-    @GetMapping("/teacher/dashboard")
-    public String teacherDashboard() {
-        return "teacher/dashboard";
-    }
+//    @GetMapping("/teacher/dashboard")
+//    public String teacherDashboard() {
+//        return "teacher/dashboard";
+//    }
 
     // --- STUDENT: TẮT DÒNG NÀY (VÌ ĐÃ CÓ StudentController) ---
     // @GetMapping("/student/dashboard")

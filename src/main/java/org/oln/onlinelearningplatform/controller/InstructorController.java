@@ -27,7 +27,7 @@ public class InstructorController {
         String email = userDetails.getUsername();
         model.addAttribute("courses", courseService.getCoursesByInstructorEmail(email));
 
-        return "teacher/dashboard";
+        return "views/teacher/dashboard";
     }
 
     // 2. Hiển thị Form tạo khóa học mới
@@ -35,7 +35,7 @@ public class InstructorController {
     public String showCreateCourseForm(Model model) {
         model.addAttribute("course", new Course());
 
-        return "teacher/course-editor";
+        return "views/teacher/course-editor";
     }
 
     // 3. Xử lý lưu khóa học (Khi bấm nút Save)
@@ -64,7 +64,7 @@ public class InstructorController {
         model.addAttribute("course", courseOpt.get());
 
         //Trỏ đúng vào thư mục 'teacher'
-        return "teacher/course-editor";
+        return "views/teacher/course-editor";
     }
 
     // 5. QUAN TRỌNG: Xử lý thêm bài học (Input cho AI)

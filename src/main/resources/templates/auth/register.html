@@ -1,47 +1,96 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Đăng Ký</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký thành viên | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .error { color: red; margin-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Tùy chỉnh select cho đồng bộ với input */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+        }
     </style>
 </head>
-<body>
-<h2>Đăng Ký Tài Khoản Mới</h2>
+<body class="min-h-screen flex items-center justify-center p-4 py-12">
 
-<div th:if="${error}" class="error" th:text="${error}"></div>
+<div class="w-full max-w-lg">
+    <div class="glass-card rounded-3xl shadow-2xl p-8 md:p-10">
 
-<form th:action="@{/register}" th:object="${user}" method="post">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mb-4">
+                <span class="text-3xl">📝</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800">Tạo tài khoản mới</h2>
+            <p class="text-slate-500 mt-2">Bắt đầu hành trình chinh phục kiến thức ngay hôm nay</p>
+        </div>
 
-    <div class="form-group">
-        <label>Tên hiển thị (Username):</label>
-        <input type="text" th:field="*{username}" required placeholder="Ví dụ: MinhTriet" style="width: 300px; padding: 8px;"/>
+        <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
+            <div class="flex items-center">
+                <span class="text-red-500 mr-2 text-xl text-center">×</span>
+                <p class="text-sm text-red-700 font-medium" th:text="${error}"></p>
+            </div>
+        </div>
+
+        <form th:action="@{/register}" th:object="${user}" method="post" class="grid grid-cols-1 gap-5">
+
+            <div class="form-group">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Tên hiển thị (Username)</label>
+                <input type="text" th:field="*{username}" required placeholder="Ví dụ: MinhTriet"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 text-slate-700"/>
+            </div>
+
+            <div class="form-group">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Email đăng nhập</label>
+                <input type="email" th:field="*{email}" required placeholder="email@domain.com"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 text-slate-700"/>
+            </div>
+
+            <div class="form-group">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Mật khẩu</label>
+                <input type="password" th:field="*{password}" required placeholder="Ví dụ: 123abc"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700"/>
+            </div>
+
+            <div class="form-group">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Bạn là ai?</label>
+                <select th:field="*{role}"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 bg-white">
+                    <option value="STUDENT">Học viên (Student)</option>
+                    <option value="INSTRUCTOR">Giảng viên (Instructor)</option>
+                </select>
+            </div>
+
+            <p class="text-[11px] text-slate-400 text-center px-4 leading-relaxed">
+                Bằng cách đăng ký, bạn đồng ý với <a href="#" class="text-indigo-600 font-bold">Điều khoản dịch vụ</a> và <a href="#" class="text-indigo-600 font-bold">Chính sách bảo mật</a> của chúng tôi.
+            </p>
+
+            <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-[0.98] mt-2">
+                Đăng Ký Tài Khoản
+            </button>
+        </form>
+
+        <p class="text-center mt-8 text-sm text-slate-600">
+            Đã có tài khoản?
+            <a th:href="@{/login}" class="text-indigo-600 font-bold hover:underline">Đăng nhập ngay</a>
+        </p>
     </div>
+</div>
 
-    <div class="form-group">
-        <label>Email (Dùng để đăng nhập):</label>
-        <input type="email" th:field="*{email}" required placeholder="email@domain.com" style="width: 300px; padding: 8px;"/>
-    </div>
-
-    <div class="form-group">
-        <label>Mật khẩu:</label>
-        <input type="password" th:field="*{password}" required style="width: 300px; padding: 8px;"/>
-    </div>
-
-    <div class="form-group">
-        <label>Bạn là:</label>
-        <select th:field="*{role}" style="width: 320px; padding: 8px;">
-            <option value="STUDENT">Học viên (Student)</option>
-            <option value="INSTRUCTOR">Giảng viên (Instructor)</option>
-        </select>
-    </div>
-
-    <button type="submit" style="padding: 10px 20px;">Đăng Ký</button>
-</form>
-
-<p>Đã có tài khoản? <a th:href="@{/login}">Đăng nhập tại đây</a></p>
 </body>
 </html>

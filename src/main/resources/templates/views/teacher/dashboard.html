@@ -1,89 +1,105 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/teacher-layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <title>Dashboard Giảng Viên</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giảng Viên Dashboard | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .header-section {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
-        }
-        .btn-create {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white; padding: 12px 25px; border-radius: 30px;
-            text-decoration: none; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .btn-create:hover { transform: translateY(-2px); }
-
-        .grid-courses { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
-        .course-card {
-            background: white; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s;
-            border-top: 5px solid #11998e;
-        }
-        .course-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .card-body { padding: 25px; }
-        .course-title { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 10px; }
-        .course-desc { color: #666; font-size: 14px; margin-bottom: 20px; min-height: 40px; }
-        .course-meta {
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid #eee; padding-top: 15px; font-size: 13px; color: #888;
-        }
-        .btn-manage {
-            background: #e0f2f1; color: #00695c; padding: 8px 15px;
-            border-radius: 5px; text-decoration: none; font-weight: bold;
-        }
-        .btn-manage:hover { background: #b2dfdb; }
-
-        /* Alerts */
-        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .sidebar-gradient { background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%); }
+        .card-shadow { shadow-sm; border: 1px solid #f1f5f9; transition: all 0.3s ease; }
+        .card-shadow:hover { transform: translateY(-5px); shadow-xl; border-color: #e0e7ff; }
+        .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
     </style>
 </head>
-<body>
-<div layout:fragment="content">
-    <div class="container">
+<body class="flex min-h-screen">
 
-        <div th:if="${success}" class="alert alert-success">✓ [[${success}]]</div>
-        <div th:if="${error}" class="alert alert-error">✗ [[${error}]]</div>
+<aside class="w-64 sidebar-gradient text-white flex flex-col shadow-xl sticky top-0 h-screen">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold tracking-tight italic">EduStack<span class="text-indigo-200">.</span>Inst</h2>
+    </div>
 
-        <div class="header-section">
-            <h1>Quản Lý Khóa Học</h1>
-            <a th:href="@{/instructor/create-course}" class="btn-create">
-                + Tạo Khóa Học Mới
+    <nav class="flex-1 px-4 py-4 space-y-2">
+        <a th:href="@{/instructor/dashboard}" class="flex items-center space-x-3 bg-white/20 p-3 rounded-xl transition font-medium">
+            <span>📊</span> <span>Bảng điều khiển</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>👨‍🎓</span> <span>Quản lý học viên</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>💰</span> <span>Thu nhập</span>
+        </a>
+    </nav>
+
+    <div class="p-4 border-t border-white/10">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="flex items-center space-x-3 w-full p-3 hover:bg-red-500/20 rounded-xl transition text-red-100 font-semibold">
+                <span>🚪</span> <span>Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="flex-1 flex flex-col">
+    <header class="bg-white shadow-sm px-8 py-5 flex justify-between items-center sticky top-0 z-10">
+        <h1 class="text-xl font-extrabold text-slate-800 uppercase tracking-tight">Quản Lý Khóa Học</h1>
+        <div class="flex items-center space-x-6">
+            <a th:href="@{/instructor/create-course}" class="btn-gradient text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95 flex items-center">
+                <span class="mr-2">+</span> Tạo Khóa Học Mới
             </a>
-            <form th:action="@{/logout}" method="post" style="margin: 0;">
-                <button type="submit" class="btn-logout">
-                    Đăng xuất
-                </button>
-            </form>
+        </div>
+    </header>
+
+    <div class="p-8">
+        <div th:if="${success}" class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl text-emerald-700 font-bold flex items-center shadow-sm">
+            <span class="mr-2">✓</span> [[${success}]]
+        </div>
+        <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 font-bold flex items-center shadow-sm">
+            <span class="mr-2">✗</span> [[${error}]]
         </div>
 
-        <div class="grid-courses" th:if="${courses != null and !courses.isEmpty()}">
-            <div class="course-card" th:each="course : ${courses}">
-                <div class="card-body">
-                    <div class="course-title" th:text="${course.title}">Java Spring Boot</div>
-                    <p class="course-desc" th:text="${course.description}">Mô tả khóa học...</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" th:if="${courses != null and !courses.isEmpty()}">
+            <div th:each="course : ${courses}" class="bg-white rounded-3xl overflow-hidden card-shadow flex flex-col">
+                <div class="h-40 bg-indigo-50 flex items-center justify-center relative">
+                    <span class="text-5xl opacity-40">📚</span>
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-indigo-600 uppercase shadow-sm">
+                        <span th:text="${course.lessons.size()} + ' Bài giảng'">0 Bài giảng</span>
+                    </div>
+                </div>
 
-                    <div class="course-meta">
-                        <span>📚 [[${course.lessons.size()}]] bài học</span>
-                        <a th:href="@{/instructor/course/{id}(id=${course.id})}" class="btn-manage">
-                            Biên tập & Thêm bài →
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-800 line-clamp-1 mb-2" th:text="${course.title}">Tên khóa học</h3>
+                    <p class="text-sm text-slate-500 line-clamp-2 mb-6 flex-1 italic" th:text="${course.description}">Mô tả khóa học...</p>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <div class="flex -space-x-2">
+                            <div class="w-7 h-7 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">1</div>
+                            <div class="w-7 h-7 rounded-full border-2 border-white bg-slate-300 flex items-center justify-center text-[10px] font-bold">2</div>
+                            <div class="w-7 h-7 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[10px] text-indigo-600 font-bold">+</div>
+                        </div>
+                        <a th:href="@{/instructor/course/{id}(id=${course.id})}"
+                           class="text-indigo-600 font-bold text-sm hover:text-purple-600 transition flex items-center">
+                            Biên tập
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div th:if="${courses == null or courses.isEmpty()}" style="text-align: center; padding: 50px; color: #999;">
-            <div style="font-size: 50px; margin-bottom: 20px;">📂</div>
-            <h3>Bạn chưa có khóa học nào</h3>
-            <p>Hãy bắt đầu chia sẻ kiến thức bằng cách tạo khóa học đầu tiên!</p>
+        <div th:if="${courses == null or courses.isEmpty()}" class="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-dashed border-slate-200">
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-5xl mb-6">📂</div>
+            <h3 class="text-xl font-bold text-slate-800">Kho dữ liệu đang trống</h3>
+            <p class="text-slate-400 mt-2 max-w-xs text-center text-sm">Hãy bắt đầu chia sẻ kiến thức bằng cách tạo khóa học đầu tiên của bạn!</p>
+            <a th:href="@{/instructor/create-course}" class="mt-8 text-indigo-600 font-bold hover:underline">Tạo khóa học ngay →</a>
         </div>
     </div>
-</div>
+</main>
+
 </body>
 </html>

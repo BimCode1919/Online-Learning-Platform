@@ -17,9 +17,10 @@ public class    Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "nvarchar(500)")
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "nvarchar(500)")
     private String description;
 
     @ManyToOne

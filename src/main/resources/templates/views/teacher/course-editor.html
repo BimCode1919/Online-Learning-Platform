@@ -1,133 +1,159 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/teacher-layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <title>Biên Tập Khóa Học</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biên Tập Khóa Học | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-        .section-card {
-            background: white; border-radius: 10px; padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px;
-        }
-        .section-title {
-            font-size: 18px; font-weight: bold; margin-bottom: 20px;
-            color: #2c3e50; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;
-        }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
-        input[type="text"], input[type="number"], textarea {
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;
-            font-size: 15px; transition: 0.3s;
-        }
-        input:focus, textarea:focus { border-color: #4ca1af; outline: none; }
-
-        .btn-save {
-            background: #2c3e50; color: white; border: none; padding: 12px 25px;
-            border-radius: 6px; cursor: pointer; font-weight: bold;
-        }
-        .btn-save:hover { background: #34495e; }
-
-        /* Style riêng cho phần nhập liệu AI */
-        .ai-input-section {
-            background: #fdfdfd; border: 2px dashed #4ca1af; padding: 25px; border-radius: 10px;
-        }
-        .ai-highlight { color: #d63384; font-weight: bold; }
-
-        .btn-add-lesson {
-            background: linear-gradient(135deg, #4ca1af 0%, #2c3e50 100%);
-            color: white; border: none; padding: 12px 25px; border-radius: 6px;
-            cursor: pointer; font-weight: bold; width: 100%;
-        }
-
-        .lesson-list { margin-top: 20px; }
-        .lesson-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;
-            border-left: 4px solid #4ca1af;
-        }
-        .back-link { text-decoration: none; color: #666; display: inline-block; margin-bottom: 15px; }
-        .back-link:hover { color: #000; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .sidebar-gradient { background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%); }
+        .ai-gradient { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); }
+        .input-focus:focus { border-color: #6366f1; ring-color: #6366f1; outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
     </style>
 </head>
-<body>
-<div layout:fragment="content">
-    <div class="container">
-        <a th:href="@{/instructor/dashboard}" class="back-link">← Quay lại Dashboard</a>
+<body class="flex min-h-screen">
 
-        <div th:if="${success}" style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            ✓ [[${success}]]
+<aside class="w-64 sidebar-gradient text-white flex flex-col shadow-xl sticky top-0 h-screen">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold italic text-white">EduStack<span class="text-indigo-200">.</span>Inst</h2>
+    </div>
+    <nav class="flex-1 px-4 space-y-2">
+        <a th:href="@{/instructor/dashboard}" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>🏠</span> <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/instructor/my-courses}" class="flex items-center space-x-3 bg-white/20 p-3 rounded-xl transition font-medium">
+            <span>📚</span> <span>Khóa học của tôi</span>
+        </a>
+    </nav>
+</aside>
+
+<main class="flex-1">
+    <header class="bg-white shadow-sm px-8 py-5 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center space-x-3">
+            <a th:href="@{/instructor/dashboard}" class="text-slate-400 hover:text-indigo-600 transition">← Dashboard</a>
+            <span class="text-slate-300">/</span>
+            <h1 class="text-xl font-bold text-slate-800">Biên tập khóa học</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full uppercase">Chế độ biên tập</span>
+        </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto p-8 space-y-8">
+
+        <div th:if="${success}" class="flex items-center p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl text-emerald-700 shadow-sm animate-pulse">
+            <span class="mr-3 text-xl">✓</span>
+            <span class="font-bold" th:text="${success}">Lưu thành công!</span>
         </div>
 
-        <div class="section-card">
-            <div class="section-title">1. Thông Tin Khóa Học</div>
-            <form th:action="@{/instructor/save-course}" th:object="${course}" method="post">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                <h2 class="font-extrabold text-slate-700 flex items-center italic">
+                    <span class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center mr-3 not-italic shadow-lg shadow-indigo-100">1</span>
+                    THÔNG TIN KHÓA HỌC
+                </h2>
+            </div>
+            <form th:action="@{/instructor/save-course}" th:object="${course}" method="post" class="p-8 space-y-6">
                 <input type="hidden" th:field="*{id}">
 
-                <div class="form-group">
-                    <label>Tên khóa học</label>
-                    <input type="text" th:field="*{title}" required placeholder="Ví dụ: Lập trình Java căn bản">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Tên khóa học chính thức</label>
+                    <input type="text" th:field="*{title}" required placeholder="Ví dụ: Lập trình Java Spring Boot Professional"
+                           class="w-full px-5 py-3 rounded-xl border border-slate-200 input-focus transition-all text-slate-700 font-medium shadow-sm"/>
                 </div>
 
-                <div class="form-group">
-                    <label>Mô tả ngắn</label>
-                    <textarea th:field="*{description}" rows="3" placeholder="Mô tả sơ lược về khóa học..."></textarea>
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Mô tả tổng quan</label>
+                    <textarea th:field="*{description}" rows="3" placeholder="Giới thiệu mục tiêu và giá trị của khóa học..."
+                              class="w-full px-5 py-3 rounded-xl border border-slate-200 input-focus transition-all text-slate-700 shadow-sm"></textarea>
                 </div>
 
-                <button type="submit" class="btn-save">💾 Lưu Thông Tin</button>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center">
+                        <span class="mr-2">💾</span> Lưu thay đổi
+                    </button>
+                </div>
             </form>
         </div>
 
-        <div class="section-card" th:if="${course.id != null}">
-            <div class="section-title">2. Nội Dung Bài Học (Dữ liệu cho AI)</div>
-
-            <div class="ai-input-section">
-                <p style="margin-bottom: 15px; color: #555;">
-                    <span style="font-size: 20px;">🤖</span>
-                    <strong>Lưu ý:</strong> Nội dung bạn nhập dưới đây sẽ là <span class="ai-highlight">NGUỒN DỮ LIỆU</span> để AI đọc và tạo câu hỏi trắc nghiệm. Hãy nhập chi tiết và đầy đủ.
-                </p>
-
-                <form th:action="@{/instructor/course/{id}/add-lesson(id=${course.id})}" method="post">
-                    <div class="row" style="display: flex; gap: 20px;">
-                        <div class="form-group" style="flex: 2;">
-                            <label>Tên bài học</label>
-                            <input type="text" name="title" required placeholder="VD: Bài 1 - Giới thiệu">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Thứ tự</label>
-                            <input type="number" name="orderIndex" placeholder="Auto">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="ai-highlight">Nội dung bài giảng (Văn bản)</label>
-                        <textarea name="content" rows="12" required
-                                  placeholder="Nhập toàn bộ kiến thức của bài học vào đây. Ví dụ: Định nghĩa, công thức, ví dụ minh họa..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-add-lesson">+ Thêm Bài Học Này</button>
-                </form>
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden" th:if="${course.id != null}">
+            <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                <h2 class="font-extrabold text-slate-700 flex items-center italic">
+                    <span class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center mr-3 not-italic shadow-lg shadow-purple-100">2</span>
+                    BÀI GIẢNG & NGUỒN DỮ LIỆU AI
+                </h2>
+                <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest bg-purple-50 px-2 py-1 rounded">AI-Ready Content</span>
             </div>
 
-            <div class="lesson-list">
-                <h3 style="font-size: 16px; margin-bottom: 15px;">Danh sách bài học hiện tại:</h3>
+            <div class="p-8">
+                <div class="ai-gradient rounded-2xl p-6 border-2 border-dashed border-purple-200 mb-8">
+                    <div class="flex items-start space-x-4 mb-6">
+                        <div class="text-3xl">🤖</div>
+                        <div>
+                            <h4 class="font-bold text-purple-900">Huấn luyện trí tuệ nhân tạo</h4>
+                            <p class="text-sm text-purple-700 leading-relaxed">Nội dung bạn nhập dưới đây sẽ được <strong>AI quét tự động</strong> để tạo bộ câu hỏi trắc nghiệm. Hãy nhập văn bản chi tiết, ví dụ và các định nghĩa quan trọng.</p>
+                        </div>
+                    </div>
 
-                <div th:if="${#lists.isEmpty(course.lessons)}" style="color: #999; font-style: italic;">
-                    Chưa có bài học nào.
+                    <form th:action="@{/instructor/course/{id}/add-lesson(id=${course.id})}" method="post" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-3 space-y-2">
+                                <label class="text-xs font-bold text-purple-900 ml-1 uppercase tracking-wider">Tiêu đề bài giảng</label>
+                                <input type="text" name="title" required placeholder="Ví dụ: Bài 1 - Biến và Kiểu dữ liệu trong Java"
+                                       class="w-full px-4 py-3 rounded-xl border border-white focus:border-purple-400 outline-none transition-all shadow-sm"/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-purple-900 ml-1 uppercase tracking-wider">Thứ tự</label>
+                                <input type="number" name="orderIndex" placeholder="Auto"
+                                       class="w-full px-4 py-3 rounded-xl border border-white focus:border-purple-400 outline-none transition-all shadow-sm"/>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-purple-900 ml-1 uppercase tracking-wider italic">Nội dung tri thức (Nguồn dữ liệu cho AI)</label>
+                            <textarea name="content" rows="10" required
+                                      placeholder="Hãy dán nội dung bài học, định nghĩa, công thức hoặc tài liệu PDF của bạn vào đây..."
+                                      class="w-full px-5 py-4 rounded-2xl border border-white focus:border-purple-400 outline-none transition-all shadow-sm text-slate-700"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-xl shadow-xl shadow-purple-200 transition-all flex items-center justify-center space-x-2">
+                            <span>🚀</span> <span>XUẤT BẢN & CẬP NHẬT AI</span>
+                        </button>
+                    </form>
                 </div>
 
-                <div class="lesson-item" th:each="lesson : ${course.lessons}">
-                    <div>
-                        <strong>[[${lesson.title}]]</strong>
-                        <span style="color: #888; font-size: 13px; margin-left: 10px;">(Thứ tự: [[${lesson.orderIndex}]])</span>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between px-2">
+                        <h3 class="font-bold text-slate-800 text-sm">Cấu trúc bài giảng hiện tại:</h3>
+                        <span class="text-xs text-slate-400" th:text="${#lists.size(course.lessons) + ' bài học'}">0 bài học</span>
                     </div>
-                    <span style="background: #e0f2f1; color: #00695c; padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">
-                        Đã lưu
-                    </span>
+
+                    <div th:if="${#lists.isEmpty(course.lessons)}" class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <p class="text-slate-400 italic text-sm">Chưa có bài học nào được tạo.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <div th:each="lesson : ${course.lessons}" class="flex items-center justify-between bg-white border border-slate-100 p-4 rounded-2xl hover:border-indigo-300 hover:shadow-md transition group">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-xs" th:text="${lesson.orderIndex}">1</div>
+                                <div>
+                                    <h5 class="font-bold text-slate-700 group-hover:text-indigo-600 transition" th:text="${lesson.title}">Tên bài học</h5>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Status: <span class="text-emerald-500">Synced to AI</span></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-slate-400 hover:text-indigo-600 p-2 transition">⚙️</button>
+                                <button class="text-slate-400 hover:text-red-500 p-2 transition">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</main>
 </body>
 </html>

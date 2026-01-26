@@ -2,19 +2,139 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .sidebar-gradient { background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%); }
+        .card-hover:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
 </head>
-<body>
-<h1>CHÀO MỪNG QUẢN TRỊ VIÊN</h1>
+<body class="flex min-h-screen">
 
-<ul>
-    <li><a th:href="@{/admin/users}">>> Quản lý người dùng (User Management)</a></li>
-    <li><a href="#">>> Quản lý khóa học (Chưa làm)</a></li>
-    <li><a href="#">>> Thống kê hệ thống (Chưa làm)</a></li>
-</ul>
+<aside class="w-64 sidebar-gradient text-white flex flex-col shadow-xl sticky top-0 h-screen">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold tracking-tight italic text-white">EduStack<span class="text-indigo-200">.</span>Admin</h2>
+    </div>
 
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Đăng xuất</button>
-</form>
+    <nav class="flex-1 px-4 py-4 space-y-2">
+        <a th:href="@{/admin/dashboard}" class="flex items-center space-x-3 bg-white/20 p-3 rounded-xl transition font-medium">
+            <span>📊</span> <span>Tổng quan hệ thống</span>
+        </a>
+        <a th:href="@{/admin/users}" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>👤</span> <span>Quản lý người dùng</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>📚</span> <span>Duyệt khóa học</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition font-medium">
+            <span>💰</span> <span>Doanh thu sàn</span>
+        </a>
+    </nav>
+
+    <div class="p-4 border-t border-white/10">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="flex items-center space-x-3 w-full p-3 hover:bg-red-500/20 rounded-xl transition text-red-100 font-semibold">
+                <span>🚪</span> <span>Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="flex-1 flex flex-col">
+    <header class="bg-white shadow-sm px-8 py-5 flex justify-between items-center sticky top-0 z-10">
+        <div class="flex items-center space-x-2">
+            <span class="text-slate-400 font-medium">Trang quản trị</span>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold">Tổng quan</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="text-right">
+                <p class="text-sm font-bold text-slate-800">Administrator</p>
+                <p class="text-xs text-indigo-600 font-semibold">Cấp quyền cao nhất</p>
+            </div>
+            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-200">A</div>
+        </div>
+    </header>
+
+    <div class="p-8 space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl">👥</div>
+                    <span class="text-green-500 text-xs font-bold">+12%</span>
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Tổng người dùng</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 mt-1" th:text="${totalUsers != null ? totalUsers : '2,450'}">0</h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 text-xl">🎓</div>
+                    <span class="text-green-500 text-xs font-bold">+5%</span>
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Giảng viên hoạt động</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 mt-1">128</h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 text-xl">📝</div>
+                    <span class="text-red-500 text-xs font-bold">Đang chờ duyệt</span>
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Yêu cầu khóa học</p>
+                <h3 class="text-3xl font-extrabold text-orange-600 mt-1">14</h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 text-xl">💰</div>
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Doanh thu sàn (tháng)</p>
+                <h3 class="text-3xl font-extrabold text-indigo-600 mt-1">45.2M</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                    <span class="mr-2">🛡️</span> Sức khỏe hệ thống
+                </h2>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-slate-600">Máy chủ CPU</span>
+                            <span class="text-sm font-bold text-indigo-600">24%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-indigo-500 h-2 rounded-full" style="width: 24%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-slate-600">Bộ nhớ lưu trữ (Database)</span>
+                            <span class="text-sm font-bold text-indigo-600">68%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-purple-500 h-2 rounded-full" style="width: 68%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                    <span class="mr-2">🔔</span> Thông báo mới nhất
+                </h2>
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-start space-x-3 p-3 bg-indigo-50 rounded-2xl">
+                        <span class="mt-1">✅</span>
+                        <p class="text-slate-700">CPU đang hoạt động tốt ở mức <strong>24%</strong> trong 24h qua</p>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-2xl">
+                        <span class="mt-1">👤</span>
+                        <p class="text-slate-700">Hệ thống đã sử dụng được 68% dung lượng Database.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
 </body>
 </html>

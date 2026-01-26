@@ -15,4 +15,6 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
     @Query("SELECT up FROM UserProgress up WHERE up.user.id = :userId AND up.lesson.id = :lessonId")
     Optional<UserProgress> findByUserIdAndLessonId(@Param("userId") Long userId,
                                                    @Param("lessonId") Long lessonId);
+
+    void deleteByUserId(Long id);
 }

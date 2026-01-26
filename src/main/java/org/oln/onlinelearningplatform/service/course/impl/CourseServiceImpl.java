@@ -1,5 +1,7 @@
 package org.oln.onlinelearningplatform.service.course.impl;
 
+import org.oln.onlinelearningplatform.dto.CourseProgressDTO;
+import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.*;
 import org.oln.onlinelearningplatform.repository.*;
 import org.oln.onlinelearningplatform.service.course.CourseService;

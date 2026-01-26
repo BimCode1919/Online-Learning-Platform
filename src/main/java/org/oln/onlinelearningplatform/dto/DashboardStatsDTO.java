@@ -1,4 +1,4 @@
-package org.oln.onlinelearningplatform.entity;
+package org.oln.onlinelearningplatform.dto;
 
 import java.util.List;
 

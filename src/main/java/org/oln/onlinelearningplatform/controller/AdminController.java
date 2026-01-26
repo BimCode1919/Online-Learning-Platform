@@ -94,6 +94,5 @@ public class AdminController {
         return "views/admin/user-form"; // Tái sử dụng form cũ
     }
 
-    // --- 2. CẬP NHẬT HÀM SAVE: XỬ LÝ MẬT KHẨU ---
-
+ 
 }

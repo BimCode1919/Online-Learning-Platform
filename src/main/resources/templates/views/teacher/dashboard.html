@@ -55,6 +55,11 @@
             <a th:href="@{/instructor/create-course}" class="btn-create">
                 + Tạo Khóa Học Mới
             </a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="btn-logout">
+                    Đăng xuất
+                </button>
+            </form>
         </div>
 
         <div class="grid-courses" th:if="${courses != null and !courses.isEmpty()}">

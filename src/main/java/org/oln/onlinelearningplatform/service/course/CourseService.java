@@ -1,8 +1,8 @@
 package org.oln.onlinelearningplatform.service.course;
 
 import org.oln.onlinelearningplatform.entity.Course;
-import org.oln.onlinelearningplatform.entity.CourseProgressDTO;
-import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
+import org.oln.onlinelearningplatform.dto.CourseProgressDTO;
+import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 
 import java.util.List;

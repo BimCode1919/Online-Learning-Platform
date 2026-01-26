@@ -2,7 +2,7 @@ package org.oln.onlinelearningplatform.controller;
 
 
 import org.oln.onlinelearningplatform.entity.Course;
-import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
+import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.service.course.CourseService;

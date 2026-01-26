@@ -1,4 +1,6 @@
-package org.oln.onlinelearningplatform.entity;
+package org.oln.onlinelearningplatform.dto;
+
+import org.oln.onlinelearningplatform.entity.Course;
 
 /**
  * DTO chứa thông tin progress của một course

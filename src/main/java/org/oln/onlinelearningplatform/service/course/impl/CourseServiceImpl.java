@@ -199,4 +199,70 @@ public class CourseServiceImpl implements CourseService {
         //Gọi đúng hàm đã khai báo trong Repository
         return courseRepository.findByInstructorIdOrderByIdDesc(instructor.getId());
     }
+
+    @Override
+    @Transactional
+    public void updateCourse(Long courseId, String title, String description) {
+        // 1. Tìm khóa học cũ
+        Course existingCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại!"));
+
+        // 2. Cập nhật thông tin mới
+        existingCourse.setTitle(title);
+        existingCourse.setDescription(description);
+
+        // 3. Lưu lại (Vì có ID nên Hibernate tự hiểu là UPDATE)
+        courseRepository.save(existingCourse);
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteLesson(Long lessonId, String instructorEmail) {
+        // 1. Tìm lesson
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Bài học không tồn tại"));
+
+        // 2. Check quyền: PHẢI DÙNG GET EMAIL
+        String ownerEmail = lesson.getCourse().getInstructor().getEmail();
+
+        // (Phòng hờ trường hợp dữ liệu cũ không có email thì mới lấy username)
+        if (ownerEmail == null) ownerEmail = lesson.getCourse().getInstructor().getUsername();
+
+        // So sánh
+        if (!ownerEmail.equals(instructorEmail)) {
+            throw new RuntimeException("Không có quyền xóa bài học này! (Owner: " + ownerEmail + " vs You: " + instructorEmail + ")");
+        }
+
+        // 3. Xóa
+        // Đảm bảo bạn đã thêm hàm deleteByLessonId trong UserProgressRepository nhé
+        userProgressRepository.deleteByLessonId(lessonId);
+        lessonRepository.delete(lesson);
+    }
+
+    // --- SỬA LẠI HÀM UPDATE ---
+    @Override
+    @Transactional
+    public void updateLesson(Long lessonId, String title, String content, Integer orderIndex, String instructorEmail) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Bài học không tồn tại"));
+
+        // 2. Check quyền: PHẢI DÙNG GET EMAIL
+        String ownerEmail = lesson.getCourse().getInstructor().getEmail();
+
+        if (ownerEmail == null) ownerEmail = lesson.getCourse().getInstructor().getUsername();
+
+        if (!ownerEmail.equals(instructorEmail)) {
+            throw new RuntimeException("Không có quyền sửa bài học này!");
+        }
+
+        // 3. Update thông tin
+        lesson.setTitle(title);
+        lesson.setContent(content);
+        if (orderIndex != null) {
+            lesson.setOrderIndex(orderIndex);
+        }
+
+        lessonRepository.save(lesson);
+    }
 }

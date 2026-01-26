@@ -18,8 +18,8 @@ public class Lesson {
     @Column(columnDefinition = "nvarchar(500)")
     private String title;
 
-    @Lob
-    @Column(columnDefinition = "nvarchar(max)")
+    //@Lob
+    @Column(columnDefinition = "nvarchar(500)")
     private String content; // Input cho AI
 
     private Integer orderIndex;

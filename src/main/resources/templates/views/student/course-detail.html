@@ -191,12 +191,37 @@
             background: #667eea;
             color: white;
         }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Back Button -->
-    <a href="/student/courses" class="back-btn">← Quay lại danh sách</a>
+    <!-- Navigation Links -->
+    <div class="nav-links">
+        <a href="/student/dashboard">📊 Dashboard</a>
+        <a href="/student/courses">📚 Khóa học</a>
+    </div>
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">

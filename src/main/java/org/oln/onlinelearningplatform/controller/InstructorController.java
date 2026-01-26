@@ -1,6 +1,7 @@
 package org.oln.onlinelearningplatform.controller;
 
 import org.oln.onlinelearningplatform.entity.Course;
+import org.oln.onlinelearningplatform.entity.Lesson;
 import org.oln.onlinelearningplatform.service.course.CourseService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,8 +45,14 @@ public class InstructorController {
                              @AuthenticationPrincipal UserDetails userDetails,
                              RedirectAttributes redirectAttributes) {
         try {
-            courseService.createCourse(course.getTitle(), course.getDescription(), userDetails.getUsername());
-            redirectAttributes.addFlashAttribute("success", "Tạo khóa học thành công!");
+            if (course.getId() != null) {
+                // --- TRƯỜNG HỢP 1: CẬP NHẬT (UPDATE) ---
+                courseService.updateCourse(course.getId(), course.getTitle(), course.getDescription());
+                redirectAttributes.addFlashAttribute("success", "Cập nhật khóa học thành công!");
+            } else {
+                courseService.createCourse(course.getTitle(), course.getDescription(), userDetails.getUsername());
+                redirectAttributes.addFlashAttribute("success", "Tạo khóa học mới thành công!");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
@@ -83,5 +90,54 @@ public class InstructorController {
         }
 
         return "redirect:/instructor/course/" + courseId;
+    }
+
+    @GetMapping("/lesson/delete/{id}")
+    public String deleteLesson(@PathVariable Long id,
+                               @AuthenticationPrincipal UserDetails userDetails,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            // Lấy ID khóa học trước khi xóa để redirect về đúng chỗ
+            Optional<Lesson> lesson = courseService.getLessonById(id);
+            Long courseId = lesson.map(l -> l.getCourse().getId()).orElse(null);
+
+            courseService.deleteLesson(id, userDetails.getUsername());
+            redirectAttributes.addFlashAttribute("success", "Xóa bài học thành công!");
+
+            return "redirect:/instructor/course/" + courseId;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi xóa: " + e.getMessage());
+            return "redirect:/instructor/dashboard";
+        }
+    }
+
+    // --- 7. HIỂN THỊ FORM SỬA BÀI HỌC (Tạo trang riêng cho đỡ rối) ---
+    @GetMapping("/lesson/edit/{id}")
+    public String showEditLessonForm(@PathVariable Long id, Model model) {
+        Optional<Lesson> lessonOpt = courseService.getLessonById(id);
+        if (lessonOpt.isEmpty()) {
+            return "redirect:/instructor/dashboard";
+        }
+        model.addAttribute("lesson", lessonOpt.get());
+        return "views/teacher/lesson-editor"; // File HTML mới sẽ tạo ở bước 4
+    }
+
+    // --- 8. XỬ LÝ LƯU SỬA BÀI HỌC ---
+    @PostMapping("/lesson/update")
+    public String updateLesson(@ModelAttribute Lesson lesson,
+                               @AuthenticationPrincipal UserDetails userDetails,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            courseService.updateLesson(lesson.getId(), lesson.getTitle(), lesson.getContent(), lesson.getOrderIndex(), userDetails.getUsername());
+            redirectAttributes.addFlashAttribute("success", "Cập nhật bài học thành công!");
+
+            // Lấy lại courseID để redirect
+            Optional<Lesson> updatedLesson = courseService.getLessonById(lesson.getId());
+            return "redirect:/instructor/course/" + updatedLesson.get().getCourse().getId();
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi cập nhật: " + e.getMessage());
+            return "redirect:/instructor/dashboard";
+        }
     }
 }

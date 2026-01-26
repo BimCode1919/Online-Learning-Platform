@@ -145,8 +145,18 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button class="text-slate-400 hover:text-indigo-600 p-2 transition">⚙️</button>
-                                <button class="text-slate-400 hover:text-red-500 p-2 transition">🗑️</button>
+                                <a th:href="@{/instructor/lesson/edit/{id}(id=${lesson.id})}"
+                                   class="text-slate-400 hover:text-indigo-600 p-2 transition"
+                                   title="Chỉnh sửa nội dung">
+                                    ⚙️
+                                </a>
+
+                                <a th:href="@{/instructor/lesson/delete/{id}(id=${lesson.id})}"
+                                   class="text-slate-400 hover:text-red-500 p-2 transition"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa bài học này không? Hành động này không thể hoàn tác!');"
+                                   title="Xóa bài học">
+                                    🗑️
+                                </a>
                             </div>
                         </div>
                     </div>

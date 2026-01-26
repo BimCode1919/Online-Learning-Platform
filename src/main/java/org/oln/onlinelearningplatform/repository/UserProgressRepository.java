@@ -17,4 +17,6 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
                                                    @Param("lessonId") Long lessonId);
 
     void deleteByUserId(Long id);
+
+    void deleteByLessonId(Long lessonId);
 }

@@ -74,4 +74,11 @@ public interface CourseService {
      * @return List<Course> do giảng viên đó tạo
      */
     List<Course> getCoursesByInstructorEmail(String email);
+
+    void updateCourse(Long courseId, String title, String description);
+
+    // ...
+    void deleteLesson(Long lessonId, String instructorEmail);
+    void updateLesson(Long lessonId, String title, String content, Integer orderIndex, String instructorEmail);
+
 }

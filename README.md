@@ -1,28 +1,94 @@
-# 🎓 Online Learning Platform
+# Online Coding Learning Platform
 
-## 📌 Overview
+# Overview
 
-**Online Learning Platform** is a web-based e-learning project built with **Java Spring MVC** and **Thymeleaf**, aiming to simulate a modern online education system.
+Online Coding Learning Platform is a web-based e-learning application focused on programming education, developed using Java Spring MVC and Thymeleaf.
 
-The platform provides a digital learning environment where users can access courses, watch video lessons, complete quizzes or assignments, and track their learning progress. The project is also designed with a future-oriented approach by incorporating **AI-assisted learning**, supporting learners through exercise generation and learning guidance.
+The platform is designed to support the core workflow of an online coding course system, where instructors can create and manage coding lessons, and students can enroll in courses, study the lessons, and track their learning progress.
 
-This project is developed primarily for **learning and demonstration purposes**, focusing on practicing Java web application development using the MVC architecture and serving as a foundation for future extensions.
+This project emphasizes server-side web development with Java, applying the MVC architecture to build a structured, maintainable, and extensible learning platform. It also serves as a foundation for future enhancements such as coding exercises, automated evaluation, and AI-assisted learning support.
 
----
+# Core Features
 
-## 🛠️ Technology Stack
+# Instructor Features
 
-- **Java / Spring Boot (Spring MVC)**
-- **Thymeleaf** (Server-side Rendering)
-- HTML, CSS, basic JavaScript
-- **Microsoft SQL Server**
+Create and manage coding lessons
 
----
+Organize lesson content for programming courses
 
-## 👤 Author
+# Student Features
+
+Register and join coding courses
+
+Access lesson materials
+
+Track learning progress throughout the course
+
+# System Architecture
+
+MVC (Model – View – Controller) pattern
+
+Clear separation between business logic, presentation, and data access
+
+Server-side rendering using Thymeleaf
+
+# Technology Stack
+
+Java
+
+Spring Boot (Spring MVC)
+
+Thymeleaf
+
+HTML, CSS, JavaScript
+
+Microsoft SQL Server
+
+# Project Goals
+
+Practice Java web application development using Spring MVC
+
+Apply MVC architecture in a real-world-inspired project
+
+Build a functional coding education platform with clear user roles
+
+Prepare a scalable base for future features such as:
+
+Coding exercises and submissions
+
+Automatic code evaluation
+
+AI-assisted learning guidance
+
+# Contributors
+
+Hoang Vu
+
+Le Minh Triet
+
+Phan Van Huy
+
+Nguyen Tran Viet An
 
 Tran An Quoc
 
----
+# Notes
 
-> _This project is intended for learning, practice, and demonstration purposes._
+This project is developed for learning, practice, and demonstration purposes, with a focus on building a coding-oriented learning platform rather than a general e-learning system.
+
+## Installation & Run
+
+### Prerequisites
+
+- JDK 17+
+- MySQL
+- Maven
+
+### Steps
+
+```bash
+git clone https://github.com/BimCode1919/Online-Learning-Platform.git
+cd Online-Learning-Platform
+mvn clean install
+mvn spring-boot:run
+```

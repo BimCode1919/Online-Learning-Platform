@@ -12,17 +12,17 @@ This project is developed primarily for **learning and demonstration purposes**,
 
 ## 🛠️ Technology Stack
 
-* **Java / Spring Boot (Spring MVC)**
-* **Thymeleaf** (Server-side Rendering)
-* HTML, CSS, basic JavaScript
-* **Microsoft SQL Server**
+- **Java / Spring Boot (Spring MVC)**
+- **Thymeleaf** (Server-side Rendering)
+- HTML, CSS, basic JavaScript
+- **Microsoft SQL Server**
 
 ---
 
 ## 👤 Author
 
-*(To be updated)*
+Tran An Quoc
 
 ---
 
-> *This project is intended for learning, practice, and demonstration purposes.*
+> _This project is intended for learning, practice, and demonstration purposes._

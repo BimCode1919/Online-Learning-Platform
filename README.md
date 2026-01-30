@@ -80,7 +80,7 @@ This project is developed for learning, practice, and demonstration purposes, wi
 
 ### Prerequisites
 
-- JDK 17+
+- JDK 22+
 - MySQL
 - Maven
 

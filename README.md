@@ -92,3 +92,15 @@ cd Online-Learning-Platform
 mvn clean install
 mvn spring-boot:run
 ```
+
+## 🗄️ Database Setup
+
+### Step 1: Create database
+
+```sql
+CREATE DATABASE OnlineLearningDB
+```
+
+### Step 2: Change username & passowrd
+
+You need to change your SQL username and password in the application.properties file.

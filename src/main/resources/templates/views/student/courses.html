@@ -39,27 +39,6 @@
             font-size: 28px;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .nav-links a:hover {
-            background: #5568d3;
-        }
-
         .user-info {
             display: flex;
             align-items: center;
@@ -219,10 +198,6 @@
     <!-- Header -->
     <div class="header">
         <h1>🎓 Khóa Học Của Tôi</h1>
-        <div class="nav-links">
-            <a href="/student/dashboard">📊 Dashboard</a>
-            <a href="/student/courses">📚 Khóa học</a>
-        </div>
         <div class="user-info">
             <div class="user-avatar" th:if="${currentUser != null}">
                 [[${currentUser.username.substring(0,1).toUpperCase()}]]

@@ -1,8 +1,8 @@
 package org.oln.onlinelearningplatform.service.course;
 
 import org.oln.onlinelearningplatform.entity.Course;
-import org.oln.onlinelearningplatform.dto.CourseProgressDTO;
-import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
+import org.oln.onlinelearningplatform.entity.CourseProgressDTO;
+import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 
 import java.util.List;
@@ -75,10 +75,17 @@ public interface CourseService {
      */
     List<Course> getCoursesByInstructorEmail(String email);
 
-    void updateCourse(Long courseId, String title, String description);
+    void addOrUpdateLesson(Long courseId, Long lessonId, String title, String content, String videoUrl);
 
-    // ...
-    void deleteLesson(Long lessonId, String instructorEmail);
-    void updateLesson(Long lessonId, String title, String content, Integer orderIndex, String instructorEmail);
+    void deleteLesson(Long lessonId);
 
+    Course saveOrUpdateCourse(Course course, String instructorEmail);
+
+    void deleteCourse(Long id);
+
+    List<Course> getCoursesByStatus(String status);
+
+    void updateCourseStatus(Long id, String newStatus);
+
+    void save(Course course);
 }

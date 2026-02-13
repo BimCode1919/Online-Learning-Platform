@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phê Duyệt Khóa Học | EduStack Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .sidebar-gradient { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #f1f5f9; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+<aside class="w-64 sidebar-gradient text-white flex flex-col shadow-xl sticky top-0 h-screen">
+    <div class="p-8 text-center border-b border-white/10">
+        <h2 class="text-2xl font-bold italic tracking-tighter text-indigo-400">EduStack.Admin</h2>
+    </div>
+    <nav class="flex-1 px-4 py-6 space-y-2">
+        <a th:href="@{/admin/dashboard}" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-2xl transition text-slate-400 hover:text-white">
+            <span>📊</span> <span class="font-medium">Dashboard</span>
+        </a>
+        <a th:href="@{/admin/courses/approval}" class="flex items-center space-x-3 bg-indigo-600 p-3 rounded-2xl transition text-white shadow-lg shadow-indigo-900/50">
+            <span>🛡️</span> <span class="font-bold">Duyệt khóa học</span>
+        </a>
+        <a th:href="@{/admin/courses}" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-2xl transition text-slate-400 hover:text-white">
+            <span>📚</span> <span class="font-medium">Quản lý khóa học</span>
+        </a>
+        <a th:href="@{/admin/users}" class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-2xl transition text-slate-400 hover:text-white">
+            <span>👥</span> <span class="font-medium">Người dùng</span>
+        </a>
+    </nav>
+    <div class="p-4 border-t border-white/10">
+        <form th:action="@{/logout}" method="post">
+            <button class="w-full flex items-center justify-center space-x-2 bg-red-500/10 text-red-400 p-3 rounded-2xl hover:bg-red-500 hover:text-white transition">
+                <span>🚪</span> <span class="font-bold">Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="flex-1 p-8">
+    <div class="max-w-5xl mx-auto space-y-8">
+
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Trung tâm phê duyệt</h1>
+                <p class="text-sm text-slate-500 font-medium mt-1">Kiểm soát chất lượng nội dung trước khi xuất bản</p>
+            </div>
+            <div class="bg-amber-100 text-amber-600 px-4 py-2 rounded-2xl text-xs font-black"
+                 th:text="${pendingCourses.size() + ' Yêu cầu đang chờ'}"></div>
+        </div>
+
+        <div class="space-y-4">
+            <div th:each="course : ${pendingCourses}"
+                 class="glass-card rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-center group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
+
+                <div class="flex items-center space-x-6">
+                    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                        📖
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800" th:text="${course.title}">Tên khóa học</h3>
+                        <div class="flex items-center space-x-4 mt-1">
+                            <span class="text-xs font-bold text-indigo-500 flex items-center">
+                                <span class="mr-1">👤</span> <span th:text="${course.instructor.username}">Giảng viên</span>
+                            </span>
+                            <span class="text-xs font-medium text-slate-400 flex items-center">
+                                <span class="mr-1">📚</span> <span th:text="${course.lessons.size() + ' bài giảng'}">0 bài giảng</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 mt-4 md:mt-0">
+                    <a th:href="@{/admin/course/{id}(id=${course.id})}" target="_blank"
+                       class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                        Xem chi tiết
+                    </a>
+
+                    <form th:action="@{/admin/courses/approve/{id}(id=${course.id})}" method="post">
+                        <button type="submit"
+                                class="bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-xs font-black hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                            DUYỆT NGAY
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(pendingCourses)}"
+                 class="glass-card rounded-[3rem] py-20 text-center border-2 border-dashed border-slate-200">
+                <div class="text-5xl mb-4">🎉</div>
+                <h3 class="text-xl font-bold text-slate-800">Tuyệt vời!</h3>
+                <p class="text-slate-500 mt-2">Hiện tại không có khóa học nào đang chờ phê duyệt.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

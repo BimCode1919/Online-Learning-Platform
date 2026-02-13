@@ -2,7 +2,7 @@ package org.oln.onlinelearningplatform.controller;
 
 
 import org.oln.onlinelearningplatform.entity.Course;
-import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
+import org.oln.onlinelearningplatform.entity.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.Lesson;
 import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.service.course.CourseService;
@@ -43,10 +43,10 @@ public class StudentController {
 
         // Lấy thông tin user đang login (để hiển thị tên)
         String email = userDetails.getUsername(); // username chính là email
-        Optional<User> userOpt = userService.findByEmail(email);
+        Optional<User> userOpt = userService.findByUsername(email);
         userOpt.ifPresent(user -> model.addAttribute("currentUser", user));
 
-        return "views/student/courses"; // Trả về template: templates/student/courses.html
+        return "student/courses"; // Trả về template: templates/student/courses.html
     }
 
     /**
@@ -74,7 +74,7 @@ public class StudentController {
 
         // Lấy user hiện tại để check progress
         String email = userDetails.getUsername();
-        Optional<User> userOpt = userService.findByEmail(email);
+        Optional<User> userOpt = userService.findByUsername(email);
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -88,7 +88,7 @@ public class StudentController {
             }
         }
 
-        return "views/student/course-detail"; // templates/student/course-detail.html
+        return "student/course-detail"; // templates/student/course-detail.html
     }
 
     /**
@@ -115,7 +115,7 @@ public class StudentController {
 
         // Check xem user đã complete lesson này chưa
         String email = userDetails.getUsername();
-        Optional<User> userOpt = userService.findByEmail(email);
+        Optional<User> userOpt = userService.findByUsername(email);
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -124,7 +124,7 @@ public class StudentController {
             model.addAttribute("currentUser", user);
         }
 
-        return "views/student/lesson-content"; // templates/student/lesson-content.html
+        return "student/lesson-content"; // templates/student/lesson-content.html
     }
 
     /**
@@ -137,11 +137,11 @@ public class StudentController {
                                       RedirectAttributes redirectAttributes) {
         // Lấy user hiện tại
         String email = userDetails.getUsername();
-        Optional<User> userOpt = userService.findByEmail(email);
+        Optional<User> userOpt = userService.findByUsername(email);
 
         if (userOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy user!");
-            return "redirect:/student/courses";
+            return "redirectstudent/courses";
         }
 
         User user = userOpt.get();
@@ -155,24 +155,19 @@ public class StudentController {
         }
 
         // Redirect về trang lesson
-        return "redirect:/student/lessons/" + lessonId;
+        return "redirect:student/lessons/" + lessonId;
     }
 
     @GetMapping("/dashboard")
     public String viewDashboard(Model model,
                                 @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
-        Optional<User> userOpt = userService.findByEmail(email);
+        User userOpt = userService.findByEmail(email);
 
-        if (userOpt.isEmpty()) {
-            return "redirect:/login";
-        }
-
-        User user = userOpt.get();
-        model.addAttribute("currentUser", user);
+        model.addAttribute("currentUser", userOpt);
 
         // Lấy dashboard stats
-        DashboardStatsDTO stats = courseService.getDashboardStats(user.getId());
+        DashboardStatsDTO stats = courseService.getDashboardStats(userOpt.getId());
         model.addAttribute("stats", stats);
 
         return "views/student/dashboard";

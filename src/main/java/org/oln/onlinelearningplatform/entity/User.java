@@ -2,7 +2,6 @@ package org.oln.onlinelearningplatform.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +17,6 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @Nationalized
     private String username;
 
     private String password;

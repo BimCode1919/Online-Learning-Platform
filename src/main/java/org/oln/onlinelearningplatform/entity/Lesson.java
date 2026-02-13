@@ -15,12 +15,14 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "nvarchar(500)")
     private String title;
 
-    //@Lob
-    @Column(columnDefinition = "nvarchar(500)")
+    @Lob
+    @Column(columnDefinition = "nvarchar(max)")
     private String content; // Input cho AI
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String videoUrl;
 
     private Integer orderIndex;
 

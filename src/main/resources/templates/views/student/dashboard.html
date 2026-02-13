@@ -23,7 +23,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             background: white;
             padding: 20px 30px;
@@ -33,8 +32,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
         .header h1 {
@@ -45,37 +42,21 @@
         .nav-links {
             display: flex;
             gap: 15px;
-            flex-wrap: wrap;
         }
 
-        .nav-links a,
-        .nav-links button {
-            padding: 10px 20px;
+        .nav-links a {
+            padding: 8px 20px;
             background: #667eea;
             color: white;
             text-decoration: none;
             border-radius: 5px;
             transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
         }
 
-        .nav-links a:hover,
-        .nav-links button:hover {
+        .nav-links a:hover {
             background: #5568d3;
         }
 
-        .nav-links .btn-logout {
-            background: #ff4757;
-        }
-
-        .nav-links .btn-logout:hover {
-            background: #ff3838;
-        }
-
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -89,12 +70,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
         }
 
         .stat-icon {
@@ -114,7 +89,6 @@
             font-size: 14px;
         }
 
-        /* Courses Progress Section */
         .courses-progress {
             background: white;
             padding: 30px;
@@ -124,7 +98,7 @@
 
         .courses-progress h2 {
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 24px;
         }
 
@@ -132,28 +106,21 @@
             background: #f9f9f9;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        .course-progress-item:last-child {
-            margin-bottom: 0;
+            margin-bottom: 15px;
         }
 
         .course-title {
             font-size: 18px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .progress-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .progress-text {
@@ -164,7 +131,7 @@
         .progress-percentage {
             font-weight: bold;
             color: #667eea;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .progress-bar-container {
@@ -172,192 +139,68 @@
             height: 12px;
             border-radius: 6px;
             overflow: hidden;
-            margin-bottom: 15px;
-            width: 100%;
+            margin-bottom: 10px;
         }
 
         .progress-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.5s ease;
+            transition: width 0.3s ease;
             border-radius: 6px;
         }
 
         .course-actions {
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         .btn-continue {
             background: #667eea;
             color: white;
-            padding: 10px 25px;
+            padding: 8px 20px;
             border: none;
             border-radius: 5px;
             text-decoration: none;
             display: inline-block;
             font-size: 14px;
-            font-weight: 500;
             transition: background 0.3s;
-            cursor: pointer;
         }
 
         .btn-continue:hover {
             background: #5568d3;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
         }
 
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
         .empty-state h3 {
             font-size: 24px;
-            margin-bottom: 15px;
-            color: #666;
+            margin-bottom: 10px;
         }
 
         .empty-state p {
-            margin-bottom: 25px;
-            font-size: 16px;
+            margin-bottom: 20px;
         }
 
         .btn-browse {
             background: #667eea;
             color: white;
-            padding: 12px 35px;
+            padding: 12px 30px;
             border-radius: 6px;
             text-decoration: none;
             display: inline-block;
             font-weight: bold;
             transition: background 0.3s;
-            font-size: 16px;
         }
 
         .btn-browse:hover {
             background: #5568d3;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .nav-links {
-                width: 100%;
-            }
-
-            .nav-links a,
-            .nav-links button {
-                flex: 1;
-                text-align: center;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-number {
-                font-size: 28px;
-            }
-        }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h1>🚀 Tiến độ học tập</h1>
-        <div class="nav-links">
-            <a href="/student/dashboard">Dashboard</a>
-            <a href="/student/courses">Khóa học của tôi</a>
-            <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
-                <button type="submit" class="btn-logout">Đăng xuất</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-number" th:text="${stats.totalCoursesEnrolled}">0</div>
-            <div class="stat-label">Khóa học đang học</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-number" th:text="${stats.totalLessonsCompleted}">0</div>
-            <div class="stat-label">Bài học đã hoàn thành</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">📝</div>
-            <div class="stat-number" th:text="${stats.totalQuizzesTaken}">0</div>
-            <div class="stat-label">Bài kiểm tra đã làm</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">🏆</div>
-            <div class="stat-number" th:text="${#numbers.formatDecimal(stats.averageQuizScore, 1, 1)}">0.0</div>
-            <div class="stat-label">Điểm trung bình</div>
-        </div>
-    </div>
-
-    <!-- Courses Progress -->
-    <div class="courses-progress">
-        <h2>📈 Tiến độ khóa học</h2>
-
-        <!-- Hiển thị courses đang học -->
-        <div th:if="${stats.coursesProgress != null and !stats.coursesProgress.isEmpty()}">
-            <div class="course-progress-item" th:each="courseProgress : ${stats.coursesProgress}">
-                <div class="course-title" th:text="${courseProgress.course.title}">Tên khóa học</div>
-
-                <div class="progress-info">
-                        <span class="progress-text">
-                            <strong th:text="${courseProgress.completedLessons}">0</strong> /
-                            <span th:text="${courseProgress.totalLessons}">0</span> bài học đã hoàn thành
-                        </span>
-                    <span class="progress-percentage">
-                            <span th:text="${#numbers.formatDecimal(courseProgress.progressPercentage, 1, 0)}">0</span>%
-                        </span>
-                </div>
-
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill"
-                         th:style="'width: ' + ${courseProgress.progressPercentage} + '%'">
-                    </div>
-                </div>
-
-                <div class="course-actions">
-                    <a th:href="@{/student/courses/{id}(id=${courseProgress.course.id})}"
-                       class="btn-continue">
-                        Tiếp tục học →
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Empty State - Chưa học khóa học nào -->
-        <div class="empty-state" th:if="${stats.coursesProgress == null or stats.coursesProgress.isEmpty()}">
-            <div class="empty-state-icon">🌱</div>
-            <h3>Bạn chưa học bài nào</h3>
-            <p>Hãy bắt đầu hành trình học tập ngay hôm nay!</p>
-            <a href="/student/courses" class="btn-browse">Xem danh sách khóa học</a>
-        </div>
-    </div>
-</div>
 </body>
 </html>

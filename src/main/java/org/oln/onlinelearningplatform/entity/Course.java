@@ -17,17 +17,20 @@ public class    Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "nvarchar(500)")
     private String title;
 
-    @Column(columnDefinition = "nvarchar(500)")
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    private String status;
+
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     private User instructor;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     private List<Lesson> lessons;
 }

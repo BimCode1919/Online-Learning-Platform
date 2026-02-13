@@ -1,7 +1,5 @@
 package org.oln.onlinelearningplatform.service.course.impl;
 
-import org.oln.onlinelearningplatform.dto.CourseProgressDTO;
-import org.oln.onlinelearningplatform.dto.DashboardStatsDTO;
 import org.oln.onlinelearningplatform.entity.*;
 import org.oln.onlinelearningplatform.repository.*;
 import org.oln.onlinelearningplatform.service.course.CourseService;
@@ -12,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -149,17 +149,18 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public Course createCourse(String title, String description, String instructorEmail) {
-        // 1. Tìm giảng viên qua Email
+        // 1. Tìm giảng viên
         User instructor = userRepository.findByUsername(instructorEmail)
                 .or(() -> userRepository.findByEmail(instructorEmail))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên với email: " + instructorEmail));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên: " + instructorEmail));
 
-        // 2. Tạo khóa học
+        // 2. Thiết lập đối tượng
         Course course = new Course();
         course.setTitle(title);
         course.setDescription(description);
         course.setInstructor(instructor);
 
+        // 3. Lưu và trả về đối tượng đã có ID từ Database
         return courseRepository.save(course);
     }
 
@@ -202,67 +203,121 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void updateCourse(Long courseId, String title, String description) {
-        // 1. Tìm khóa học cũ
-        Course existingCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại!"));
+    public void addOrUpdateLesson(Long courseId, Long lessonId, String title, String content, String videoUrl) {
+        // 1. Luôn cần tìm Course cha để đảm bảo tính hợp lệ
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học ID: " + courseId));
 
-        // 2. Cập nhật thông tin mới
-        existingCourse.setTitle(title);
-        existingCourse.setDescription(description);
+        String cleanId = extractYoutubeId(videoUrl);
+        Lesson lesson;
 
-        // 3. Lưu lại (Vì có ID nên Hibernate tự hiểu là UPDATE)
-        courseRepository.save(existingCourse);
-    }
+        if (lessonId != null) {
+            // --- LOGIC CHỈNH SỬA (UPDATE) ---
+            lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học ID: " + lessonId));
 
-
-    @Override
-    @Transactional
-    public void deleteLesson(Long lessonId, String instructorEmail) {
-        // 1. Tìm lesson
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Bài học không tồn tại"));
-
-        // 2. Check quyền: PHẢI DÙNG GET EMAIL
-        String ownerEmail = lesson.getCourse().getInstructor().getEmail();
-
-        // (Phòng hờ trường hợp dữ liệu cũ không có email thì mới lấy username)
-        if (ownerEmail == null) ownerEmail = lesson.getCourse().getInstructor().getUsername();
-
-        // So sánh
-        if (!ownerEmail.equals(instructorEmail)) {
-            throw new RuntimeException("Không có quyền xóa bài học này! (Owner: " + ownerEmail + " vs You: " + instructorEmail + ")");
+            lesson.setTitle(title);
+            lesson.setContent(content);
+            lesson.setVideoUrl(cleanId);
+            // Không cần set lại Course vì nó đã thuộc về Course này rồi
+        } else {
+            // --- LOGIC TẠO MỚI (INSERT) ---
+            lesson = new Lesson();
+            lesson.setTitle(title);
+            lesson.setContent(content);
+            lesson.setVideoUrl(cleanId);
+            lesson.setCourse(course); // Gắn bài học vào khóa học
         }
 
-        // 3. Xóa
-        // Đảm bảo bạn đã thêm hàm deleteByLessonId trong UserProgressRepository nhé
-        userProgressRepository.deleteByLessonId(lessonId);
-        lessonRepository.delete(lesson);
-    }
-
-    // --- SỬA LẠI HÀM UPDATE ---
-    @Override
-    @Transactional
-    public void updateLesson(Long lessonId, String title, String content, Integer orderIndex, String instructorEmail) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Bài học không tồn tại"));
-
-        // 2. Check quyền: PHẢI DÙNG GET EMAIL
-        String ownerEmail = lesson.getCourse().getInstructor().getEmail();
-
-        if (ownerEmail == null) ownerEmail = lesson.getCourse().getInstructor().getUsername();
-
-        if (!ownerEmail.equals(instructorEmail)) {
-            throw new RuntimeException("Không có quyền sửa bài học này!");
-        }
-
-        // 3. Update thông tin
-        lesson.setTitle(title);
-        lesson.setContent(content);
-        if (orderIndex != null) {
-            lesson.setOrderIndex(orderIndex);
-        }
-
+        // 2. Lưu (JPA sẽ tự động Update nếu object có ID và Insert nếu chưa có ID)
         lessonRepository.save(lesson);
+    }
+
+    private String extractYoutubeId(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return null;
+        }
+        // Regex mạnh mẽ để tách ID từ nhiều định dạng link YouTube (shorter, watch, embed, v.v.)
+        String pattern = "(?<=watch\\?v=|/videos/|/embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*";
+        Pattern compiledPattern = Pattern.compile(pattern);
+        Matcher matcher = compiledPattern.matcher(url);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        // Nếu link đã là ID rồi (ví dụ: dQw4w9WgXcQ) thì trả về chính nó
+        return url;
+    }
+
+    @Override
+    @Transactional
+    public void deleteLesson(Long lessonId) {
+        lessonRepository.deleteById(lessonId);
+    }
+
+    @Override
+    @Transactional
+    public Course saveOrUpdateCourse(Course course, String instructorEmail) {
+        User instructor = userRepository.findByUsername(instructorEmail)
+                .or(() -> userRepository.findByEmail(instructorEmail))
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên"));
+
+        if (course.getId() != null) {
+            // --- LOGIC CẬP NHẬT ---
+            Course existingCourse = courseRepository.findById(course.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học để cập nhật"));
+            if ("FIX".equals(course.getStatus())) {
+                course.setStatus("PENDING"); // Gửi lại cho Admin
+            }
+            existingCourse.setTitle(course.getTitle());
+            existingCourse.setDescription(course.getDescription());
+
+            // Khi cập nhật thông tin, thường ta giữ nguyên trạng thái hiện tại
+            existingCourse.setStatus("PENDING");
+
+            return courseRepository.save(existingCourse);
+        } else {
+            course.setInstructor(instructor);
+            course.setStatus("PENDING");
+
+            return courseRepository.save(course);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long id) {
+        // 1. Kiểm tra tồn tại
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại"));
+
+        // 2. Thực hiện xóa (Cascade sẽ tự lo phần Lessons)
+        courseRepository.delete(course);
+    }
+
+    @Override
+    public List<Course> getCoursesByStatus(String status) {
+        // Gọi Repository để tìm các khóa học theo trạng thái (PENDING, APPROVE,...)
+        return courseRepository.findByStatus(status);
+    }
+
+    @Override
+    @Transactional
+    public void updateCourseStatus(Long id, String newStatus) {
+        // 1. Tìm khóa học theo ID
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học với ID: " + id));
+
+        // 2. Cập nhật trạng thái mới (Ví dụ: từ "PENDING" sang "APPROVE")
+        course.setStatus(newStatus);
+
+        // 3. Lưu lại thay đổi
+        courseRepository.save(course);
+    }
+
+    @Override
+    public void save (Course course) {
+        courseRepository.save(course);
     }
 }

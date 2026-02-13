@@ -1,33 +1,35 @@
 package org.oln.onlinelearningplatform.service.auth.impl;
 
+import jakarta.transaction.Transactional;
 import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.repository.UserRepository;
 import org.oln.onlinelearningplatform.service.auth.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional
+    public void registerUser(User user, String role) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("ROLE_" + role); // Set role dựa trên tham số truyền vào
+        user.setCreatedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override
-    public void registerUser(User user) {
-        // 1. Mã hóa mật khẩu trước khi lưu
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // 2. Set role mặc định nếu chưa có (ví dụ: STUDENT)
-        if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("STUDENT");
-        }
-
-        // 3. Lưu vào DB
-        userRepository.save(user);
+    public boolean existsByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 }

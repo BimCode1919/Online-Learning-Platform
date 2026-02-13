@@ -1,22 +1,27 @@
 package org.oln.onlinelearningplatform.seeder;
 
-import lombok.RequiredArgsConstructor;
-import org.oln.onlinelearningplatform.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
+@Order(1) // Chạy đầu tiên khi ứng dụng khởi động
 public class DataSeeder implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final SeederService seederService;
+    private final UserSeeder userSeeder;
+
+    // Sử dụng Constructor Injection (DI)
+    public DataSeeder(UserSeeder userSeeder) {
+        this.userSeeder = userSeeder;
+    }
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.count() == 0) {
-            seederService.seedAllData();
-            System.out.println(">>> Đã seed 3 users, 10 khóa học và 30 bài học thành công!");
-        }
+        System.out.println(">>> Đang khởi tạo dữ liệu mẫu (Seeding)...");
+
+        // Chạy theo thứ tự: User trước, Course sau (vì Course cần Instructor)
+        userSeeder.seed();
+
+        System.out.println(">>> Hoàn tất khởi tạo dữ liệu!");
     }
 }

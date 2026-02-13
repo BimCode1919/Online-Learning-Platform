@@ -1,13 +1,8 @@
 package org.oln.onlinelearningplatform.config;
 
-import org.oln.onlinelearningplatform.security.CustomAuthenticationFailureHandler;
-import org.oln.onlinelearningplatform.security.CustomAuthenticationSuccessHandler;
-import org.oln.onlinelearningplatform.security.CustomUserDetailsService; // Sẽ tạo ở bước 2
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,37 +14,39 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Autowired
-    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-
-    @Autowired
     private CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. Tắt CSRF để thuận tiện cho việc test POST form trong giai đoạn phát triển
+                .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // Cho phép file tĩnh
-                        .requestMatchers("/login", "/register").permitAll() // Cho phép truy cập trang login/register
-                        .requestMatchers("/instructor/**").hasRole("INSTRUCTOR") // Chỉ Instructor mới vào đc
+                        // Cho phép tất cả mọi người truy cập tài nguyên tĩnh và các trang công khai
+                        .requestMatchers("/", "/login", "/register", "/instructor/login", "/instructor/register", "/admin/login").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+
+                        // Phân quyền Dashboard
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/student/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
-                        .anyRequest().authenticated() // Còn lại phải đăng nhập
+                        .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")
+                        .requestMatchers("/student/**").hasRole("STUDENT")
+
+                        // Tất cả các yêu cầu khác phải xác thực
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // URL dẫn đến Controller login
-                        .loginProcessingUrl("/perform_login") // URL Spring Security tự xử lý khi submit form
+                        .loginPage("/login") // Đảm bảo URL này khớp với @GetMapping("/login") trong Controller
+                        .loginProcessingUrl("/perform_login")
                         .usernameParameter("email")
-                        .successHandler(successHandler) // Giao việc điều hướng cho class CustomAuthenticationSuccessHandler
-                                                        // Nó sẽ kiểm tra cái role rồi điều hướng về trang phù hợp
-
-                        //.failureUrl("/login?error=true") // Thất bại thì về lại login kèm lỗi
-                        .failureHandler(customAuthenticationFailureHandler) // cho phép tùy chỉnh xử lý lỗi, nghĩa là nhập sai password sẽ lưu email đã nhập vào session
-                                                                            //cho phép giữ lại email đã nhập trong form
+                        .successHandler(successHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessUrl("/?logout") // Logout xong về trang chủ index
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
 
@@ -58,6 +55,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Mã hóa mật khẩu
+        return new BCryptPasswordEncoder();
     }
 }

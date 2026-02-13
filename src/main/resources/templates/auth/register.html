@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký thành viên | EduStack</title>
+    <title th:text="${role == 'STUDENT' ? 'Gia nhập Học viên | OL Platform' : 'Trở thành Giảng viên | OL Platform'}"></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -16,79 +16,75 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        /* Tùy chỉnh select cho đồng bộ với input */
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.25rem;
+        .input-focus:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            outline: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 py-12">
+<body class="min-h-screen flex items-center justify-center p-4">
 
 <div class="w-full max-w-lg">
     <div class="glass-card rounded-3xl shadow-2xl p-8 md:p-10">
 
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mb-4">
-                <span class="text-3xl">📝</span>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-2xl mb-4">
+                <span class="text-3xl" th:text="${role == 'STUDENT' ? '🎓' : '👨‍🏫'}">🎓</span>
             </div>
-            <h2 class="text-2xl font-extrabold text-slate-800">Tạo tài khoản mới</h2>
-            <p class="text-slate-500 mt-2">Bắt đầu hành trình chinh phục kiến thức ngay hôm nay</p>
+            <h2 class="text-2xl font-extrabold text-slate-800 uppercase tracking-tight"
+                th:text="${role == 'STUDENT' ? 'ĐĂNG KÝ HỌC VIÊN' : 'ĐĂNG KÝ GIẢNG VIÊN'}"></h2>
+            <p class="text-slate-500 mt-2 text-sm">Bắt đầu hành trình tri thức cùng EduStack</p>
         </div>
 
-        <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
+        <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-sm text-red-700 font-medium">
             <div class="flex items-center">
-                <span class="text-red-500 mr-2 text-xl text-center">×</span>
-                <p class="text-sm text-red-700 font-medium" th:text="${error}"></p>
+                <span class="mr-2">⚠️</span>
+                <span th:text="${error}">Thông báo lỗi</span>
             </div>
         </div>
 
-        <form th:action="@{/register}" th:object="${user}" method="post" class="grid grid-cols-1 gap-5">
+        <form th:action="${role == 'STUDENT' ? '/register' : '/instructor/register'}"
+              th:object="${user}" method="post" class="space-y-5">
 
-            <div class="form-group">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Tên hiển thị (Username)</label>
-                <input type="text" th:field="*{username}" required placeholder="Ví dụ: MinhTriet"
-                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 text-slate-700"/>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Tên người dùng</label>
+                <input type="text" th:field="*{username}" required placeholder="Ví dụ: nva_2026"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 input-focus transition-all text-slate-700 shadow-sm"/>
             </div>
 
-            <div class="form-group">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Email đăng nhập</label>
-                <input type="email" th:field="*{email}" required placeholder="email@domain.com"
-                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 text-slate-700"/>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Email</label>
+                <input type="email" th:field="*{email}" required placeholder="name@example.com"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 input-focus transition-all text-slate-700 shadow-sm"/>
             </div>
 
-            <div class="form-group">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Mật khẩu</label>
-                <input type="password" th:field="*{password}" required placeholder="Ví dụ: 123abc"
-                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700"/>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Mật khẩu</label>
+                <input type="password" th:field="*{password}" required placeholder="••••••••"
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 input-focus transition-all text-slate-700 shadow-sm"/>
+                <p class="text-[10px] text-slate-400 mt-2 ml-1 italic">Sử dụng ít nhất 8 ký tự bao gồm chữ và số.</p>
             </div>
-
-            <div class="form-group">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Bạn là ai?</label>
-                <select th:field="*{role}"
-                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 bg-white">
-                    <option value="STUDENT">Học viên (Student)</option>
-                    <option value="INSTRUCTOR">Giảng viên (Instructor)</option>
-                </select>
-            </div>
-
-            <p class="text-[11px] text-slate-400 text-center px-4 leading-relaxed">
-                Bằng cách đăng ký, bạn đồng ý với <a href="#" class="text-indigo-600 font-bold">Điều khoản dịch vụ</a> và <a href="#" class="text-indigo-600 font-bold">Chính sách bảo mật</a> của chúng tôi.
-            </p>
 
             <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-[0.98] mt-2">
-                Đăng Ký Tài Khoản
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-[0.98] mt-4">
+                Hoàn tất đăng ký
             </button>
         </form>
 
-        <p class="text-center mt-8 text-sm text-slate-600">
-            Đã có tài khoản?
-            <a th:href="@{/login}" class="text-indigo-600 font-bold hover:underline">Đăng nhập ngay</a>
-        </p>
+        <div class="text-center mt-8">
+            <p class="text-sm text-slate-600 mb-4">
+                Đã có tài khoản?
+                <a th:href="${role == 'STUDENT' ? '/login' : '/instructor/login'}"
+                   class="text-indigo-600 font-bold hover:underline">Đăng nhập ngay</a>
+            </p>
+
+            <hr class="border-slate-100 mb-4"/>
+
+            <a th:href="@{/}" class="text-slate-400 text-xs font-medium hover:text-indigo-600 transition flex items-center justify-center">
+                <span class="mr-1">←</span> Quay lại trang chủ
+            </a>
+        </div>
     </div>
 </div>
 

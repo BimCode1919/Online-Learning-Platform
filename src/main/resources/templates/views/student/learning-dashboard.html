@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Học tập: [[${course.title}]]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Tùy chỉnh thanh cuộn cho sidebar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-[#0f172a] text-slate-200 overflow-hidden">
+
+<div class="flex h-screen flex-col md:flex-row">
+    <div class="w-full md:w-80 bg-[#1e293b] border-r border-slate-700 flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-slate-700 bg-[#1e293b] z-10">
+            <a th:href="@{/student/my-courses}" class="text-xs font-bold text-indigo-400 uppercase tracking-widest hover:text-white transition flex items-center gap-2">
+                <span>←</span> Quay lại khóa học
+            </a>
+            <h1 class="mt-4 font-black text-white text-lg leading-tight" th:text="${course.title}">Tên khóa học</h1>
+
+            <div class="mt-4 flex items-center gap-2">
+                <div class="flex-1 bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-indigo-500 h-full transition-all duration-500"
+                         th:style="'width: ' + ${enrollment.progressPercentage} + '%'"></div>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400" th:text="${#numbers.formatDecimal(enrollment.progressPercentage, 0, 0) + '%'}">0%</span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+            <div th:each="lesson, i : ${course.lessons}"
+                 class="lesson-item p-4 rounded-2xl hover:bg-slate-700/50 cursor-pointer transition border border-transparent hover:border-slate-600 group"
+                 th:data-id="${lesson.id}"
+                 th:data-video="${lesson.videoUrl}"
+                 th:data-title="${lesson.title}"
+                 onclick="handleLessonClick(this)">
+
+                <div class="flex items-start gap-3">
+                    <div class="bg-slate-800 text-slate-500 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold group-hover:bg-indigo-500 group-hover:text-white transition-colors" th:text="${i.count}">
+                        1
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black text-slate-500 block mb-1 uppercase tracking-wider">Bài học</span>
+                        <span class="text-sm font-bold group-hover:text-white leading-snug block" th:text="${lesson.title}">Tiêu đề bài học</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+        <div class="flex-1 bg-black relative flex items-center justify-center">
+            <iframe id="youtube-player"
+                    class="w-full h-full hidden"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+
+            <div id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-center bg-slate-900">
+                <div class="max-w-sm px-6">
+                    <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/50 animate-bounce">
+                        <span class="text-3xl text-white">▶</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Sẵn sàng học tập?</h2>
+                    <p class="text-slate-500 mt-2">Hãy chọn một bài học từ danh sách bên trái để bắt đầu bài giảng ngay nhé!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] px-8 py-4 flex justify-between items-center border-t border-slate-700">
+            <div class="flex flex-col">
+                <span id="current-lesson-label" class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Đang phát</span>
+                <span id="current-lesson-title" class="font-bold text-indigo-400">Vui lòng chọn bài học...</span>
+            </div>
+
+            <button onclick="markAsCompleted()" id="btn-complete" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg shadow-emerald-900/20 active:scale-95">
+                ✔ Hoàn thành bài học
+            </button>
+        </div>
+
+        <div class="p-8 bg-[#0f172a] border-t border-slate-800 overflow-y-auto h-64 custom-scrollbar">
+            <div class="max-w-4xl">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
+                    Mô tả bài học
+                </h3>
+                <p class="text-slate-400 leading-relaxed" th:text="${course.description}">
+                    Mô tả khóa học sẽ hiển thị tại đây...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let currentLessonId = null;
+    const enrollmentId = [[${enrollment.id}]];
+
+    /**
+     * Hàm xử lý khi click vào item bài học
+     */
+    function handleLessonClick(element) {
+        const id = element.getAttribute('data-id');
+        const videoId = element.getAttribute('data-video');
+        const title = element.getAttribute('data-title');
+
+        // Cập nhật giao diện active
+        document.querySelectorAll('.lesson-item').forEach(item => {
+            item.classList.remove('bg-slate-700/80', 'border-slate-500');
+        });
+        element.classList.add('bg-slate-700/80', 'border-slate-500');
+
+        playVideo(id, videoId, title);
+    }
+
+    /**
+     * Hàm load video YouTube vào iframe
+     */
+    function playVideo(lessonId, videoId, title) {
+        currentLessonId = lessonId;
+
+        const player = document.getElementById('youtube-player');
+        const placeholder = document.getElementById('video-placeholder');
+        const btnComplete = document.getElementById('btn-complete');
+        const titleDisplay = document.getElementById('current-lesson-title');
+
+        // Tạo URL YouTube Embed
+        player.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0";
+
+        player.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        btnComplete.classList.remove('hidden');
+        titleDisplay.innerText = title;
+    }
+
+    /**
+     * Hàm gọi API cập nhật tiến độ học tập
+     */
+    function markAsCompleted() {
+        if (!currentLessonId) {
+            alert("Vui lòng chọn bài học trước!");
+            return;
+        }
+
+        const btn = document.getElementById('btn-complete');
+        btn.innerText = "Đang xử lý...";
+        btn.disabled = true;
+
+        fetch(`/student/api/lesson/${currentLessonId}/complete?enrollmentId=${enrollmentId}`, {
+            method: 'POST',
+            headers: {
+                // Thêm CSRF Token nếu Spring Security của bạn đang bật CSRF
+                // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+            }
+        })
+            .then(response => {
+                if(response.ok) {
+                    // Hiển thị thông báo thành công đẹp hơn thay vì alert
+                    btn.innerText = "Đã lưu tiến độ!";
+                    btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
+
+                    setTimeout(() => {
+                        location.reload(); // Reload để cập nhật thanh tiến độ (%)
+                    }, 1000);
+                } else {
+                    alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                    btn.innerText = "✔ Hoàn thành bài học";
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
+            });
+    }
+</script>
+
+</body>
+</html>

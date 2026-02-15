@@ -13,4 +13,5 @@ public interface UserService {
     void deleteUserById(Long id); // Xóa theo ID
     void saveUser(User user); // Lưu user (dùng cho cả update/create)
     Optional<User> findById(Long id); // Tìm theo ID để edit
+    long countAllUsers();
 }

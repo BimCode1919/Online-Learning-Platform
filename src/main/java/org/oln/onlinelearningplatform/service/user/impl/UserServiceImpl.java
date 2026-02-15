@@ -51,4 +51,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id);
     }
 
+    @Override
+    public long countAllUsers(){
+        return userRepository.count();
+    }
+
 }

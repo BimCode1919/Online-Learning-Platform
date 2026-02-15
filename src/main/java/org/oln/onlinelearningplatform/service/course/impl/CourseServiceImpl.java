@@ -47,50 +47,9 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Lesson> getLessonsByCourseId(Long courseId) {
-        Optional<Course> courseOpt = courseRepository.findById(courseId);
-        if (courseOpt.isPresent()) {
-            Course course = courseOpt.get();
-            return course.getLessons();
-        }
-        return List.of();
-    }
-
-    @Override
-    public Optional<Lesson> getLessonById(Long lessonId) {
-        return lessonRepository.findById(lessonId);
-    }
-
-    @Override
     public boolean isLessonCompletedByUser(Long userId, Long lessonId) {
         Optional<UserProgress> progressOpt = userProgressRepository.findByUserIdAndLessonId(userId, lessonId);
         return progressOpt.isPresent() && Boolean.TRUE.equals(progressOpt.get().getIsCompleted());
-    }
-
-    @Override
-    @Transactional
-    public void markLessonAsCompleted(Long userId, Long lessonId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Lesson không tồn tại"));
-
-        Optional<UserProgress> progressOpt = userProgressRepository.findByUserIdAndLessonId(userId, lessonId);
-
-        if (progressOpt.isPresent()) {
-            UserProgress progress = progressOpt.get();
-            progress.setIsCompleted(true);
-            progress.setUpdatedAt(LocalDateTime.now());
-            userProgressRepository.save(progress);
-        } else {
-            UserProgress newProgress = new UserProgress();
-            newProgress.setUser(user);
-            newProgress.setLesson(lesson);
-            newProgress.setIsCompleted(true);
-            newProgress.setUpdatedAt(LocalDateTime.now());
-            userProgressRepository.save(newProgress);
-        }
     }
 
     @Override
@@ -146,50 +105,7 @@ public class CourseServiceImpl implements CourseService {
 
     // --- PHẦN 2: LOGIC MỚI CHO INSTRUCTOR (LUỒNG 1 - ĐÃ SỬA LỖI) ---
 
-    @Override
-    @Transactional
-    public Course createCourse(String title, String description, String instructorEmail) {
-        // 1. Tìm giảng viên
-        User instructor = userRepository.findByUsername(instructorEmail)
-                .or(() -> userRepository.findByEmail(instructorEmail))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên: " + instructorEmail));
 
-        // 2. Thiết lập đối tượng
-        Course course = new Course();
-        course.setTitle(title);
-        course.setDescription(description);
-        course.setInstructor(instructor);
-
-        // 3. Lưu và trả về đối tượng đã có ID từ Database
-        return courseRepository.save(course);
-    }
-
-    @Override
-    @Transactional
-    public Lesson addLesson(Long courseId, String title, String content, Integer orderIndex, String instructorEmail) {
-        // 1. Tìm khóa học
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại ID: " + courseId));
-
-        // 2. Bảo mật: Check quyền
-        String ownerEmail = course.getInstructor().getEmail();
-        if (ownerEmail == null) ownerEmail = course.getInstructor().getUsername();
-
-        if (!ownerEmail.equals(instructorEmail)) {
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa khóa học của người khác!");
-        }
-
-        // 3. Tạo bài học
-        Lesson lesson = new Lesson();
-        lesson.setTitle(title);
-        lesson.setContent(content); // Input cho AI
-
-        int nextOrder = (orderIndex != null) ? orderIndex : (course.getLessons().size() + 1);
-        lesson.setOrderIndex(nextOrder);
-        lesson.setCourse(course);
-
-        return lessonRepository.save(lesson);
-    }
 
     @Override
     public List<Course> getCoursesByInstructorEmail(String email) {
@@ -272,6 +188,7 @@ public class CourseServiceImpl implements CourseService {
             }
             existingCourse.setTitle(course.getTitle());
             existingCourse.setDescription(course.getDescription());
+            existingCourse.setPrice(course.getPrice());
 
             // Khi cập nhật thông tin, thường ta giữ nguyên trạng thái hiện tại
             existingCourse.setStatus("PENDING");
@@ -280,6 +197,12 @@ public class CourseServiceImpl implements CourseService {
         } else {
             course.setInstructor(instructor);
             course.setStatus("PENDING");
+
+            if (course.getPrice() == null) {
+                course.setPrice(0.0);
+            } else {
+                course.setPrice(course.getPrice());
+            }
 
             return courseRepository.save(course);
         }
@@ -298,7 +221,6 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<Course> getCoursesByStatus(String status) {
-        // Gọi Repository để tìm các khóa học theo trạng thái (PENDING, APPROVE,...)
         return courseRepository.findByStatus(status);
     }
 
@@ -319,5 +241,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void save (Course course) {
         courseRepository.save(course);
+    }
+
+    @Override
+    public List<Course> getCoursesByInstructor(User instructor){
+        return courseRepository.getCoursesByInstructor(instructor);
     }
 }

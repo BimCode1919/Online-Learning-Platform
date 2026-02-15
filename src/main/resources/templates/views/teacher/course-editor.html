@@ -59,6 +59,14 @@
             </div>
             <form th:action="@{/instructor/save-course}" th:object="${course}" method="post" class="space-y-6">
                 <input type="hidden" th:field="*{id}">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">Giá khóa học (VND)</label>
+                    <input type="number"
+                           th:field="*{price}"
+                           step="0.01"
+                           class="w-full p-4 rounded-2xl border-slate-100 bg-slate-50 focus:ring-2 focus:ring-indigo-500"
+                           placeholder="Ví dụ: 99.99">
+                </div>
                 <div class="grid grid-cols-1 gap-6">
                     <div class="space-y-2">
                         <label class="text-xs font-black text-slate-500 uppercase ml-1">Tên khóa học chính thức</label>

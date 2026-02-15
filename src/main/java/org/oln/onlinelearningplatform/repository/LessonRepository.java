@@ -1,11 +1,13 @@
 package org.oln.onlinelearningplatform.repository;
 
+import org.oln.onlinelearningplatform.entity.Course;
 import org.oln.onlinelearningplatform.entity.Lesson;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
-
-    // Tìm tất cả bài học của 1 khóa học và sắp xếp theo thứ tự (Bài 1, Bài 2...)
-    List<Lesson> findByCourseIdOrderByOrderIndexAsc(Long courseId);
+    Optional<Lesson> findByCourseIdAndTitle(Long courseId, String title);
 }

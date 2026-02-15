@@ -9,10 +9,14 @@ import org.springframework.stereotype.Component;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserSeeder userSeeder;
+    private final CourseSeeder courseSeeder;
+    private final LessonSeeder lessonSeeder;
 
     // Sử dụng Constructor Injection (DI)
-    public DataSeeder(UserSeeder userSeeder) {
+    public DataSeeder(UserSeeder userSeeder, CourseSeeder courseSeeder, LessonSeeder lessonSeeder) {
         this.userSeeder = userSeeder;
+        this.courseSeeder = courseSeeder;
+        this.lessonSeeder = lessonSeeder;
     }
 
     @Override
@@ -21,6 +25,8 @@ public class DataSeeder implements CommandLineRunner {
 
         // Chạy theo thứ tự: User trước, Course sau (vì Course cần Instructor)
         userSeeder.seed();
+        courseSeeder.seed();
+        lessonSeeder.seed();
 
         System.out.println(">>> Hoàn tất khởi tạo dữ liệu!");
     }

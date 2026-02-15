@@ -97,6 +97,21 @@
             </div>
         </div>
 
+        <div class="glass-card p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
+            <div class="flex items-center justify-between relative z-10">
+                <div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-tighter">Doanh thu sàn (5%)</p>
+                    <h2 class="text-3xl font-black text-indigo-600 mt-2"
+                        th:text="${#numbers.formatDecimal(totalSystemRevenue ?: 0, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                        0 VNĐ
+                    </h2>
+                </div>
+                <div class="stat-icon bg-indigo-100 text-indigo-600">💰</div>
+            </div>
+            <div class="mt-4 text-xs font-bold text-slate-400 uppercase">Lợi nhuận từ các giao dịch</div>
+            <div class="absolute -bottom-4 -right-4 text-8xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card rounded-[2.5rem] p-8 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center">

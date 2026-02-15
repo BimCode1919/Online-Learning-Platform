@@ -1,9 +1,11 @@
 package org.oln.onlinelearningplatform.controller;
 
 import org.oln.onlinelearningplatform.entity.Course;
+import org.oln.onlinelearningplatform.entity.Enrollment;
 import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.service.auth.AuthService;
 import org.oln.onlinelearningplatform.service.course.CourseService;
+import org.oln.onlinelearningplatform.service.course.EnrollmentService;
 import org.oln.onlinelearningplatform.service.user.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -21,21 +23,42 @@ public class AdminController {
     private final AuthService authService; // Dùng để tạo user mới có mã hóa pass
     private final PasswordEncoder passwordEncoder;
     private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
 
-    public AdminController(UserService userService, AuthService authService, PasswordEncoder passwordEncoder, CourseService courseService) {
+    public AdminController(UserService userService, AuthService authService, PasswordEncoder passwordEncoder, CourseService courseService, EnrollmentService enrollmentService) {
         this.userService = userService;
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
         this.courseService = courseService;
+        this.enrollmentService = enrollmentService;
     }
 
     // 1. Dashboard chính của Admin
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
-        // Lấy danh sách chờ duyệt để đếm số lượng
+        // 1. Lấy danh sách chờ duyệt (PENDING)
         List<Course> pendingCourses = courseService.getCoursesByStatus("PENDING");
         model.addAttribute("pendingCount", pendingCourses.size());
-        return "views/admin/dashboard"; // đường dẫn file của bạn
+
+        // 2. Đếm số lượng khóa học đã được duyệt (APPROVE)
+        List<Course> approvedCourses = courseService.getCoursesByStatus("APPROVE");
+        model.addAttribute("approvedCount", approvedCourses.size());
+
+        // 3. Đếm tổng số người dùng trong hệ thống
+        long userCount = userService.countAllUsers(); // Giả sử bạn có hàm này trong UserService
+        model.addAttribute("userCount", userCount);
+
+        // 4. Tính tổng doanh thu của hệ thống (5% Admin Commission)
+        // Lấy tất cả Enrollment đã thanh toán thành công
+        List<Enrollment> completedEnrollments = enrollmentService.getEnrollmentsByStatus("COMPLETED");
+
+        double totalSystemRevenue = completedEnrollments.stream()
+                .mapToDouble(e -> e.getAdminCommission() != null ? e.getAdminCommission() : 0.0)
+                .sum();
+
+        model.addAttribute("totalSystemRevenue", totalSystemRevenue);
+
+        return "views/admin/dashboard";
     }
 
     @GetMapping("/courses/approval")

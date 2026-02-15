@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Khóa học của tôi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans">
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex items-center justify-between mb-10">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tight">Khóa học của tôi</h1>
+            <p class="text-slate-500 mt-1">Nơi lưu trữ hành trình tri thức của bạn</p>
+        </div>
+        <a th:href="@{/student/courses}" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
+            ← Khám phá thêm khóa học
+        </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(enrollments)}" class="bg-white rounded-3xl p-20 text-center shadow-sm border border-slate-100">
+        <div class="text-6xl mb-4">📚</div>
+        <h2 class="text-xl font-bold text-slate-800">Bạn chưa sở hữu khóa học nào</h2>
+        <p class="text-slate-500 mb-8">Hãy bắt đầu hành trình học tập ngay hôm nay!</p>
+        <a th:href="@{/student/courses}" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs hover:bg-indigo-700 transition">
+            Xem danh sách khóa học
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" th:if="${!#lists.isEmpty(enrollments)}">
+        <div th:each="enrollment : ${enrollments}" class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group">
+            <div class="relative aspect-video overflow-hidden">
+                <div class="absolute top-4 left-4">
+                        <span class="bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                            Đã sở hữu
+                        </span>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <h3 class="font-bold text-slate-900 text-lg mb-2 line-clamp-2 h-14" th:text="${enrollment.course.title}"></h3>
+
+                <div class="mt-4 mb-6">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                        <span>Tiến độ học tập</span>
+                        <span th:text="${enrollment.progressPercentage + '%'}">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-full rounded-full transition-all duration-500"
+                             th:style="'width: ' + ${enrollment.progressPercentage} + '%'"></div>
+                    </div>
+                </div>
+
+                <a th:href="@{/student/learning/{id}(id=${enrollment.course.id})}"
+                   class="block w-full text-center bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase text-xs hover:bg-indigo-600 transition-colors">
+                    Tiếp tục học tập
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -3,248 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${course.title}">Chi Tiết Khóa Học</title>
+    <title>Chi tiết khóa học | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+          rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .breadcrumb {
-            background: rgba(255,255,255,0.2);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .breadcrumb a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-
-        .course-info {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .course-info h1 {
-            color: #333;
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-
-        .course-info p {
-            color: #666;
-            line-height: 1.6;
-            font-size: 16px;
-        }
-
-        .instructor-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: #f0f0f0;
-            padding: 8px 15px;
-            border-radius: 20px;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        .lessons-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .lessons-section h2 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .lesson-item {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s, transform 0.2s;
-            cursor: pointer;
-            border-left: 4px solid transparent;
-        }
-
-        .lesson-item:hover {
-            background: #f0f0f0;
-            transform: translateX(5px);
-            border-left-color: #667eea;
-        }
-
-        .lesson-item.completed {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-
-        .lesson-info {
-            flex: 1;
-        }
-
-        .lesson-number {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            font-weight: bold;
-            margin-right: 15px;
-            font-size: 14px;
-        }
-
-        .lesson-title {
-            font-size: 18px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .lesson-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .completed-badge {
-            background: #28a745;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .start-btn {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .start-btn:hover {
-            background: #5568d3;
-        }
-
-        .empty-lessons {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .back-btn {
-            background: white;
-            color: #667eea;
-            padding: 10px 20px;
-            border: 2px solid #667eea;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 20px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #667eea;
-            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fbfcfd;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Back Button -->
-    <a href="/student/courses" class="back-btn">← Quay lại danh sách</a>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-        <a href="/student/courses">Khóa học</a> / [[${course.title}]]
-    </div>
+<main class="max-w-5xl mx-auto py-12 px-6">
+    <a th:href="@{/student/courses}"
+       class="inline-flex items-center text-sm font-bold text-slate-400 hover:text-indigo-600 transition mb-10 group">
+        <span class="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Quay lại thư viện
+    </a>
 
-    <!-- Course Information -->
-    <div class="course-info">
-        <h1 th:text="${course.title}">Tên khóa học</h1>
-        <p th:text="${course.description}">Mô tả khóa học...</p>
-        <div class="instructor-badge" th:if="${course.instructor != null}">
-            👨‍🏫 Giảng viên: <strong>[[${course.instructor.username}]]</strong>
-        </div>
-    </div>
+    <div class="grid grid-cols-1 gap-12">
+        <div class="bg-white rounded-[3rem] p-8 md:p-12 shadow-sm border border-slate-100 relative overflow-hidden">
+            <div class="relative z-10">
+                <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                    Nội dung chất lượng cao
+                </span>
 
-    <!-- Lessons Section -->
-    <div class="lessons-section">
-        <h2>📚 Danh Sách Bài Học</h2>
+                <h1 class="text-4xl md:text-5xl font-black text-slate-800 mt-6 leading-tight" th:text="${course.title}">
+                    Tên khóa học</h1>
 
-        <div th:if="${lessons != null and !lessons.isEmpty()}">
-            <div class="lesson-item"
-                 th:each="lesson, iterStat : ${lessons}"
-                 th:classappend="${lesson.orderIndex == 1} ? 'completed' : ''"
-                 th:onclick="'window.location.href=\'/student/lessons/' + ${lesson.id} + '\''">
-
-                <div class="lesson-info">
-                    <span class="lesson-number">[[${iterStat.count}]]</span>
-                    <span class="lesson-title" th:text="${lesson.title}">Tên bài học</span>
+                <div class="flex flex-wrap items-center mt-8 gap-6 text-slate-500 font-semibold">
+                    <div class="flex items-center bg-slate-50 px-4 py-2 rounded-2xl">
+                        <span class="text-lg mr-2">👨‍🏫</span>
+                        <span th:text="${course.instructor.username}">Giảng viên</span>
+                    </div>
+                    <div class="flex items-center bg-slate-50 px-4 py-2 rounded-2xl">
+                        <span class="text-lg mr-2">📖</span>
+                        <span th:text="${course.lessons.size() + ' bài giảng'}">12 bài giảng</span>
+                    </div>
                 </div>
 
-                <div class="lesson-actions">
-                        <span class="completed-badge" th:if="${lesson.orderIndex == 1}">
-                            ✓ Đã hoàn thành
-                        </span>
-                    <a th:href="@{/student/lessons/{id}(id=${lesson.id})}"
-                       class="start-btn"
-                       onclick="event.stopPropagation()">
-                        Học ngay →
-                    </a>
+                <div class="mt-10 max-w-2xl">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Mô tả khóa học</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg" th:text="${course.description}">
+                        Đây là khóa học chuyên sâu giúp bạn nắm vững kiến thức từ cơ bản đến nâng cao...
+                    </p>
+                </div>
+
+                <div class="mt-12 flex items-center space-x-6">
+
+                    <div th:if="${enrollment == null}">
+                        <form th:action="@{/student/course/enroll/{id}(id=${course.id})}" method="post">
+                            <button type="submit"
+                                    class="bg-slate-900 text-white px-10 py-5 rounded-3xl font-black uppercase text-sm shadow-2xl hover:bg-indigo-600 transition-all active:scale-95 flex items-center">
+                                🚀 Thanh toán ngay — <span th:text="${course.price + ' VND'}"></span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:if="${enrollment != null && enrollment.paymentStatus == 'COMPLETED'}"
+                         class="flex items-center gap-4">
+                        <a th:href="@{/student/learning/{id}(id=${course.id})}"
+                           class="bg-emerald-500 text-white px-10 py-5 rounded-3xl font-black uppercase text-sm shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all active:scale-95">
+                            Bắt đầu học ➔
+                        </a>
+                        <div class="text-left">
+                            <p class="text-xs font-black text-emerald-600 uppercase tracking-widest">Đã sở hữu</p>
+                            <p class="text-[10px] text-slate-400 font-bold"
+                               th:text="'Tham gia từ: ' + ${#temporals.format(enrollment.enrolledAt, 'dd/MM/yyyy')}"></p>
+                        </div>
+                    </div>
+
+                    <div th:if="${enrollment != null && enrollment.paymentStatus == 'PENDING'}">
+                        <div class="bg-amber-50 border border-amber-200 text-amber-600 px-8 py-5 rounded-3xl font-black uppercase text-sm">
+                            <div class="flex items-center mb-3">
+                                <span class="animate-pulse mr-2">⏳</span> Đang chờ thanh toán...
+                            </div>
+
+                            <div class="flex gap-2">
+                                <form th:action="@{/student/course/enroll/{id}(id=${enrollment.course.id})}" method="post">
+                                    <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs">
+                                        Thanh toán lại
+                                    </button>
+                                </form>
+
+                                <form th:action="@{/student/course/cancel-enrollment/{id}(id=${enrollment.id})}" method="post">
+                                    <button type="submit" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs">
+                                        Hủy yêu cầu
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-indigo-50 rounded-full opacity-50 blur-3xl"></div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="flex justify-between items-end px-4">
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Nội dung bài học</h3>
+                <span class="text-sm font-bold text-slate-400" th:text="${course.lessons.size() + ' Video'}"></span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div th:each="lesson, stat : ${course.lessons}"
+                     class="group bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between hover:border-indigo-200 transition-all">
+
+                    <div class="flex items-center space-x-6">
+                        <span class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center font-black text-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"
+                              th:text="${stat.count < 10 ? '0' + stat.count : stat.count}">01</span>
+                        <div>
+                            <h4 class="font-bold text-slate-700 group-hover:text-slate-900 transition-colors"
+                                th:text="${lesson.title}">Tên bài giảng</h4>
+                            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Video
+                                Lesson</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center text-slate-300">
+                        <span th:if="${enrollment == null || enrollment.paymentStatus != 'COMPLETED'}"
+                              class="text-[10px] font-black uppercase mr-2 tracking-tighter">Khóa nội dung</span>
+                        <span th:text="${enrollment != null && enrollment.paymentStatus == 'COMPLETED' ? '✅' : '🔒'}"></span>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="empty-lessons" th:if="${lessons == null or lessons.isEmpty()}">
-            <h3>📝 Chưa có bài học nào</h3>
-            <p>Giảng viên đang cập nhật nội dung khóa học. Vui lòng quay lại sau!</p>
-        </div>
     </div>
-</div>
+</main>
+
 </body>
 </html>

@@ -1,8 +1,11 @@
 package org.oln.onlinelearningplatform.controller;
 
 import org.oln.onlinelearningplatform.entity.Course;
+import org.oln.onlinelearningplatform.entity.Enrollment;
+import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.repository.CourseRepository;
 import org.oln.onlinelearningplatform.service.course.CourseService;
+import org.oln.onlinelearningplatform.service.user.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -10,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -18,18 +22,30 @@ public class InstructorController {
 
     private final CourseService courseService;
     private final CourseRepository courseRepository;
+    private final UserService userService;
 
-    public InstructorController(CourseService courseService, CourseRepository courseRepository) {
+    public InstructorController(CourseService courseService, CourseRepository courseRepository, UserService userService) {
         this.courseService = courseService;
         this.courseRepository = courseRepository;
+        this.userService = userService;
     }
 
     // 1. Dashboard: Hiển thị danh sách khóa học của Giảng viên
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        User instructor = userService.findByEmail(userDetails.getUsername());
+        List<Course> courses = courseService.getCoursesByInstructor(instructor);
+
+        // Tính tổng thu nhập
+        double totalRevenue = courses.stream()
+                .flatMap(course -> course.getEnrollments().stream())
+                .filter((Enrollment enrollment) -> "COMPLETED".equals(enrollment.getPaymentStatus())) // Chỉ định rõ kiểu Enrollment
+                .mapToDouble(Enrollment::getInstructorShare)
+                .sum();
+
         String email = userDetails.getUsername();
         model.addAttribute("courses", courseService.getCoursesByInstructorEmail(email));
-
+        model.addAttribute("totalRevenue", totalRevenue);
         return "views/teacher/dashboard";
     }
 
@@ -59,7 +75,6 @@ public class InstructorController {
     // Bạn cần có thêm API này để hiển thị lại trang Editor sau khi Redirect
     @GetMapping("/course/{id}")
     public String editCourse(@PathVariable("id") Long id, Model model) {
-        // Sửa dòng này: .orElseThrow hoặc .get() để lấy Course ra khỏi Optional
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học với ID: " + id));
 

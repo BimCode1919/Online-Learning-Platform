@@ -71,14 +71,24 @@
             🎉 [[${success}]]
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-white">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 text-white">
             <div class="bg-indigo-500 p-6 rounded-3xl shadow-lg shadow-indigo-100 relative overflow-hidden">
                 <div class="relative z-10">
                     <p class="text-indigo-100 text-xs font-bold uppercase tracking-wider">Tổng khóa học</p>
-                    <h3 class="text-3xl font-black mt-1" th:text="${courses != null ? #lists.size(courses) : '0'}">
-                        0</h3>
+                    <h3 class="text-3xl font-black mt-1" th:text="${courses != null ? #lists.size(courses) : '0'}">0</h3>
                 </div>
                 <span class="absolute -right-4 -bottom-4 text-7xl opacity-20">📚</span>
+            </div>
+
+            <div class="bg-emerald-500 p-6 rounded-3xl shadow-lg shadow-emerald-100 relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Doanh thu nhận được</p>
+                    <h3 class="text-3xl font-black mt-1"
+                        th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                        0 VNĐ
+                    </h3>
+                </div>
+                <span class="absolute -right-4 -bottom-4 text-7xl opacity-20">💰</span>
             </div>
         </div>
 

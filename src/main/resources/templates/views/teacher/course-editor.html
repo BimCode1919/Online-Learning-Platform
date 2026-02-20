@@ -255,12 +255,17 @@
                                 </a>
 
                                 <!-- Form xóa quiz (nếu cần) -->
+                                <!-- Form xóa quiz (sửa lại) -->
                                 <form th:action="@{'/instructor/quiz/' + ${lesson.quiz.id} + '/delete'}"
                                       method="post"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này?')">
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này? Tất cả câu hỏi sẽ bị xóa theo.')">
+
+                                    <!-- Thêm CSRF token nếu Spring Security bật -->
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                                     <button type="submit"
                                             class="text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition">
-                                        🗑️
+                                        🗑️ Xóa quiz
                                     </button>
                                 </form>
                             </div>

@@ -1,8 +1,11 @@
 package org.oln.onlinelearningplatform.service.quiz.impl;
 
 import org.oln.onlinelearningplatform.entity.Lesson;
+import org.oln.onlinelearningplatform.entity.Question;
 import org.oln.onlinelearningplatform.entity.Quiz;
 import org.oln.onlinelearningplatform.repository.LessonRepository;
+import org.oln.onlinelearningplatform.repository.OptionRepository;
+import org.oln.onlinelearningplatform.repository.QuestionRepository;
 import org.oln.onlinelearningplatform.repository.QuizRepository;
 import org.oln.onlinelearningplatform.service.quiz.QuizService;
 import org.springframework.stereotype.Service;
@@ -12,12 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class QuizServiceImpl implements QuizService {
 
-    private final LessonRepository lessonRepository;
     private final QuizRepository quizRepository;
+    private final LessonRepository lessonRepository;
+    private final QuestionRepository questionRepository;
+    private final OptionRepository optionRepository;
 
-    public QuizServiceImpl(LessonRepository lessonRepository, QuizRepository quizRepository) {
+    public QuizServiceImpl(LessonRepository lessonRepository, QuizRepository quizRepository, QuestionRepository questionRepository, OptionRepository optionRepository) {
         this.lessonRepository = lessonRepository;
         this.quizRepository = quizRepository;
+        this.questionRepository = questionRepository;
+        this.optionRepository = optionRepository;
     }
 
     @Override
@@ -51,11 +58,33 @@ public class QuizServiceImpl implements QuizService {
         return savedQuiz;
     }
 
+    @Override
+    @Transactional
     public void deleteQuiz(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
+
+        // QUAN TRỌNG: Xóa tham chiếu từ lesson trước
+        Lesson lesson = quiz.getLesson();
+        if (lesson != null) {
+            lesson.setQuiz(null);
+            lessonRepository.save(lesson);
+        }
+
+        // Xóa tất cả options và questions
+        if (quiz.getQuestions() != null) {
+            for (Question question : quiz.getQuestions()) {
+                if (question.getOptions() != null) {
+                    optionRepository.deleteAll(question.getOptions());
+                }
+            }
+            questionRepository.deleteAll(quiz.getQuestions());
+        }
+
+        // Cuối cùng xóa quiz
         quizRepository.delete(quiz);
     }
-
-
 }
+
+
+

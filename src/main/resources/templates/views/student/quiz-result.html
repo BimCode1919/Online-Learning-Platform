@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Kết quả quiz | EduStack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .result-card {
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid #334155;
+    }
+    .score-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 800;
+      margin: 0 auto;
+      background: linear-gradient(145deg, #4f46e5, #6366f1);
+      color: white;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.5);
+      position: relative;
+    }
+    .score-circle::before {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #818cf8, #4f46e5);
+      opacity: 0.3;
+      z-index: -1;
+    }
+    .feedback-good {
+      background: linear-gradient(145deg, #065f46, #047857);
+    }
+    .feedback-average {
+      background: linear-gradient(145deg, #92400e, #b45309);
+    }
+    .feedback-poor {
+      background: linear-gradient(145deg, #991b1b, #b91c1c);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Navigation -->
+<nav class="bg-[#1e293b] border-b border-slate-700 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <a th:href="@{'/student/learning/' + ${quiz.lesson.course.id}}"
+         class="text-slate-400 hover:text-white transition flex items-center gap-2">
+        <span class="text-xl">←</span>
+        <span class="text-sm font-bold">Quay lại bài học</span>
+      </a>
+      <div class="h-6 w-px bg-slate-700"></div>
+      <div>
+        <h1 class="text-white font-bold text-sm" th:text="${quiz.lesson.course.title}">Tên khóa học</h1>
+        <p class="text-xs text-indigo-400" th:text="'Bài: ' + ${quiz.lesson.title}">Tên bài học</p>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-4xl mx-auto py-12 px-6">
+  <!-- Card kết quả -->
+  <div class="result-card rounded-3xl p-8 md:p-12 border border-slate-700">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+            <span class="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">
+                KẾT QUẢ QUIZ
+            </span>
+      <h2 class="text-3xl md:text-4xl font-black text-white mt-6" th:text="${quiz.title}">Tên quiz</h2>
+      <p class="text-slate-400 mt-2">Hoàn thành lúc
+        <!-- SỬA Ở ĐÂY: dùng createdAt thay vì completedAt -->
+        <span th:text="${#temporals.format(attempt.createdAt, 'HH:mm dd/MM/yyyy')}"></span>
+      </p>
+    </div>
+
+    <!-- Điểm số và thông tin -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <!-- Vòng tròn điểm -->
+      <div class="text-center">
+        <div class="score-circle">
+          <span th:text="${#numbers.formatDecimal(attempt.score, 0, 0)}"></span>
+          <span class="text-2xl">%</span>
+        </div>
+
+        <!-- Badge độ khó -->
+        <div class="mt-4">
+                    <span th:class="${'px-4 py-2 rounded-full text-xs font-bold inline-block ' +
+                        (quiz.difficulty == 'EASY' ? 'bg-emerald-600 text-white' :
+                         (quiz.difficulty == 'MEDIUM' ? 'bg-amber-600 text-white' :
+                          'bg-red-600 text-white'))}"
+                          th:text="${quiz.difficulty}">
+                    </span>
+        </div>
+      </div>
+
+      <!-- Thống kê chi tiết -->
+      <div class="space-y-4">
+        <div class="bg-[#0f172a] rounded-2xl p-5 border border-slate-700">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Số câu đúng</span>
+            <span class="text-white font-bold text-xl" th:text="${attempt.correctAnswers} + '/' + ${attempt.totalQuestions}"></span>
+          </div>
+        </div>
+
+        <div class="bg-[#0f172a] rounded-2xl p-5 border border-slate-700">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Tỉ lệ đúng</span>
+            <span class="text-white font-bold text-xl" th:text="${#numbers.formatDecimal(attempt.score, 0, 1)} + '%'"></span>
+          </div>
+        </div>
+
+        <div class="bg-[#0f172a] rounded-2xl p-5 border border-slate-700">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Tổng số câu</span>
+            <span class="text-white font-bold text-xl" th:text="${attempt.totalQuestions}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback từ AI -->
+    <div th:if="${attempt.aiFeedback != null and !attempt.aiFeedback.isEmpty()}"
+         class="mt-8 p-6 rounded-2xl border"
+         th:class="${attempt.score >= 80 ? 'bg-emerald-600/20 border-emerald-600' :
+                       (attempt.score >= 50 ? 'bg-amber-600/20 border-amber-600' :
+                        'bg-red-600/20 border-red-600')}">
+
+      <div class="flex items-start gap-3">
+        <span class="text-2xl" th:text="${attempt.score >= 80 ? '🎉' : (attempt.score >= 50 ? '📝' : '💪')}"></span>
+        <div>
+          <h3 class="font-bold text-white mb-2">Đánh giá</h3>
+          <p class="text-slate-300 leading-relaxed" th:text="${attempt.aiFeedback}"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nút hành động -->
+    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+      <a th:href="@{'/student/quiz/review/' + ${attempt.id}}"
+         class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+        <span>📋</span> Xem lại chi tiết
+      </a>
+
+      <a th:href="@{'/student/learning/' + ${quiz.lesson.course.id}}"
+         class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+        <span>📚</span> Tiếp tục học
+      </a>
+
+      <a th:href="@{'/student/quiz/' + ${quiz.id} + '/take'}"
+         class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+        <span>🔄</span> Làm lại quiz
+      </a>
+    </div>
+  </div>
+
+  <!-- Lời khuyên dựa trên điểm số -->
+  <div class="mt-8 text-center text-slate-500 text-sm">
+    <p th:if="${attempt.score >= 80}">
+      🌟 Xuất sắc! Bạn đã nắm rất vững kiến thức của bài học này.
+    </p>
+    <p th:if="${attempt.score >= 50 and attempt.score < 80}">
+      📝 Khá tốt! Hãy xem lại những câu sai để hiểu bài hơn nhé.
+    </p>
+    <p th:if="${attempt.score < 50}">
+      💪 Đừng nản! Hãy học lại bài học và thử quiz một lần nữa.
+    </p>
+  </div>
+</main>
+
+</body>
+</html>

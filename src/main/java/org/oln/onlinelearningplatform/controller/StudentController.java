@@ -212,12 +212,38 @@ public class StudentController {
                            Model model,
                            RedirectAttributes redirectAttributes) {
 
-        User user = userService.findByEmail(userDetails.getUsername()); // Đổi tên biến
-        Quiz quiz = quizRepository.findById(quizId)
+        User user = userService.findByEmail(userDetails.getUsername());
+
+        // Debug: Kiểm tra quizId
+        System.out.println("=== TAKE QUIZ ===");
+        System.out.println("Quiz ID nhận được: " + quizId);
+
+        // Lấy quiz với tất cả dữ liệu
+        Quiz quiz = quizRepository.findByIdWithQuestionsAndOptions(quizId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz với ID: " + quizId));
 
+        // Debug: Kiểm tra dữ liệu quiz
+        System.out.println("Quiz tìm thấy: " + (quiz != null ? quiz.getId() : "null"));
+        System.out.println("Quiz lesson: " + (quiz.getLesson() != null ? quiz.getLesson().getTitle() : "null"));
+        System.out.println("Quiz course: " + (quiz.getLesson() != null && quiz.getLesson().getCourse() != null ?
+                quiz.getLesson().getCourse().getTitle() : "null"));
+        System.out.println("Questions size: " + (quiz.getQuestions() != null ? quiz.getQuestions().size() : 0));
+
+        // Kiểm tra null trước khi truy cập
+        if (quiz.getLesson() == null) {
+            redirectAttributes.addFlashAttribute("error", "Quiz không có bài học liên kết!");
+            return "redirect:/student/courses";
+        }
+
+        if (quiz.getLesson().getCourse() == null) {
+            redirectAttributes.addFlashAttribute("error", "Bài học không có khóa học liên kết!");
+            return "redirect:/student/courses";
+        }
+
         // Kiểm tra học viên đã đăng ký khóa học chưa
-        Enrollment enrollment = enrollmentService.findByUserAndCourse(user.getId(), quiz.getLesson().getCourse().getId());
+        Enrollment enrollment = enrollmentService.findByUserAndCourse(user.getId(),
+                quiz.getLesson().getCourse().getId());
+
         if (enrollment == null || !"COMPLETED".equals(enrollment.getPaymentStatus())) {
             redirectAttributes.addFlashAttribute("error", "Bạn chưa đăng ký khóa học này!");
             return "redirect:/student/courses";
@@ -239,11 +265,21 @@ public class StudentController {
     @PostMapping("/quiz/{quizId}/submit")
     public String submitQuiz(@PathVariable Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
-                             @RequestParam List<Long> selectedOptions,
+                             @RequestParam(value = "selectedOptions", required = false) List<Long> selectedOptions,
                              RedirectAttributes redirectAttributes) {
 
-        User user = userService.findByEmail(userDetails.getUsername()); // Đổi tên biến
-        Quiz quiz = quizRepository.findById(quizId)
+        // Log để debug
+        System.out.println("=== SUBMIT QUIZ ===");
+        System.out.println("Quiz ID: " + quizId);
+        System.out.println("Selected options: " + (selectedOptions != null ? selectedOptions : "null"));
+
+        if (selectedOptions == null || selectedOptions.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Bạn chưa chọn đáp án nào!");
+            return "redirect:/student/quiz/" + quizId + "/take";
+        }
+
+        User user = userService.findByEmail(userDetails.getUsername());
+        Quiz quiz = quizRepository.findByIdWithQuestionsAndOptions(quizId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
 
         // Tính điểm
@@ -268,7 +304,7 @@ public class StudentController {
 
         // Lưu kết quả
         QuizAttempt attempt = new QuizAttempt();
-        attempt.setUser(user); // Dùng user
+        attempt.setUser(user);
         attempt.setQuiz(quiz);
         attempt.setScore(score);
         attempt.setTotalQuestions(totalQuestions);

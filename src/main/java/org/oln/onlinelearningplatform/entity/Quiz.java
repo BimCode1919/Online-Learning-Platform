@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "quizzes")
@@ -37,7 +39,7 @@ public class Quiz {
     private Lesson lesson; // nếu là AI quiz theo lesson
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
-    private List<Question> questions;
+    private Set<Question> questions = new HashSet<>();
 
     public enum QuizType {
         MANUAL,

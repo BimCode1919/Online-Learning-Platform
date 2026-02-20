@@ -26,7 +26,7 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
-    private AIQuiz quiz;
+    private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
     private List<Option> options;

@@ -92,6 +92,7 @@
             </div>
         </div>
 
+        <!-- Course List -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
              th:if="${courses != null and !courses.isEmpty()}">
             <div th:each="course : ${courses}"
@@ -124,12 +125,16 @@
                         học</h3>
                     <p class="text-sm text-slate-500 mt-2 line-clamp-2 italic" th:text="${course.description}">Mô tả
                         ngắn về khóa học này...</p>
+
+                    <!-- Admin Note Section -->
                     <div th:if="${course.status == 'FIX' and course.note != null}"
                          class="mt-4 p-3 bg-red-50 border-l-2 border-red-400 rounded-r-xl">
                         <p class="text-[10px] font-black text-red-600 uppercase mb-1">Yêu cầu từ Admin:</p>
                         <p class="text-xs text-red-700 font-medium line-clamp-2" th:text="${course.note}">Nội dung
                             note...</p>
                     </div>
+
+                    <!-- Course Statistics -->
                     <div class="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
                         <div class="flex items-center space-x-1 text-slate-400">
                             <span class="text-xs font-bold"
@@ -143,16 +148,47 @@
                         </a>
                     </div>
 
+                    <!-- Lesson List Section -->
+                    <div class="mt-4" th:if="${course.lessons != null and !course.lessons.isEmpty()}">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-2">Danh sách bài học:</p>
+                        <div class="space-y-2">
+                            <div th:each="lesson : ${course.lessons}"
+                                 class="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-700" th:text="${lesson.title}">
+                                        Lesson title
+                                    </p>
+                                </div>
+
+                                <!-- Create Quiz Button -->
+                                <form th:action="@{'/instructor/lesson/' + ${lesson.id} + '/create-quiz'}"
+                                      method="post"
+                                      class="flex items-center gap-2">
+                                    <select name="difficulty"
+                                            class="text-xs border rounded-lg px-2 py-1 bg-white">
+                                        <option value="EASY">Easy</option>
+                                        <option value="MEDIUM">Medium</option>
+                                        <option value="HARD">Hard</option>
+                                    </select>
+                                    <button type="submit"
+                                            class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-lg hover:bg-indigo-700 transition">
+                                        + Quiz
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Empty State -->
         <div th:if="${courses == null or courses.isEmpty()}"
              class="flex flex-col items-center justify-center py-20 bg-white rounded-[40px] border-2 border-dashed border-slate-200">
             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner">
-                Empty
+                📚
             </div>
-            <h3 class="text-xl font-bold text-slate-800">Chưa có bài giảng nào</h3>
+            <h3 class="text-xl font-bold text-slate-800">Chưa có khóa học nào</h3>
             <p class="text-slate-400 mt-2 text-sm text-center max-w-xs leading-relaxed">
                 Bạn chưa tạo khóa học nào trên hệ thống. Hãy bắt đầu chia sẻ kiến thức của mình ngay hôm nay!
             </p>

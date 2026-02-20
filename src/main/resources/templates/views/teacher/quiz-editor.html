@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Quiz | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .sidebar-gradient { background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #f1f5f9; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+<aside class="w-64 sidebar-gradient text-white flex flex-col shadow-xl sticky top-0 h-screen">
+    <div class="p-8">
+        <h2 class="text-2xl font-bold italic">EduStack.Inst</h2>
+    </div>
+    <nav class="flex-1 px-4 space-y-2">
+        <a th:href="@{/instructor/dashboard}"
+           class="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-2xl transition font-medium">
+            <span>🏠</span> <span>Bảng điều khiển</span>
+        </a>
+    </nav>
+</aside>
+
+<main class="flex-1 p-8">
+    <div class="max-w-5xl mx-auto space-y-8">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Quản Lý Quiz</h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    <!-- KIỂM TRA NULL TRƯỚC KHI TRUY CẬP -->
+                    <a th:if="${quiz != null and quiz.course != null}"
+                       th:href="@{'/instructor/course/' + ${quiz.course.id}}"
+                       class="text-indigo-600 hover:underline">
+                        ← Quay lại khóa học
+                    </a>
+                    <span th:if="${quiz == null or quiz.course == null}" class="text-gray-400">
+                        ← Không thể quay lại (thiếu thông tin khóa học)
+                    </span>
+                </p>
+            </div>
+
+            <!-- Badge trạng thái quiz -->
+            <span th:if="${quiz != null and quiz.status != null}"
+                  th:class="${'px-4 py-2 rounded-full text-xs font-bold ' +
+                    (quiz.status == 'GENERATING' ? 'bg-blue-100 text-blue-700' :
+                     (quiz.status == 'READY' ? 'bg-emerald-100 text-emerald-700' :
+                      'bg-red-100 text-red-700'))}"
+                  th:text="${quiz.status}">
+            </span>
+        </div>
+
+        <!-- Thông báo lỗi nếu quiz null -->
+        <div th:if="${quiz == null}" class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-2xl text-red-700 font-bold text-sm">
+            ❌ Không tìm thấy thông tin quiz
+        </div>
+
+        <!-- Thông báo -->
+        <div th:if="${success}" class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-2xl text-emerald-700 font-bold text-sm">
+            🎉 <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-2xl text-red-700 font-bold text-sm">
+            ❌ <span th:text="${error}"></span>
+        </div>
+
+        <!-- Thông tin quiz - CHỈ HIỂN THỊ KHI QUIZ KHÔNG NULL -->
+        <div th:if="${quiz != null}" class="glass-card rounded-[2rem] shadow-sm p-8">
+            <div class="flex justify-between items-start mb-6">
+                <h2 class="text-lg font-bold text-slate-700 flex items-center">
+                    <span class="mr-2">📋</span> Thông tin quiz
+                </h2>
+
+                <!-- Badge độ khó -->
+                <span th:if="${quiz.difficulty != null}"
+                      th:class="${'px-4 py-2 rounded-full text-xs font-bold ' +
+                        (quiz.difficulty == 'EASY' ? 'bg-emerald-100 text-emerald-700' :
+                         (quiz.difficulty == 'MEDIUM' ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'))}"
+                      th:text="${quiz.difficulty}">
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Khóa học</p>
+                    <p class="text-sm font-semibold text-slate-800"
+                       th:text="${quiz.course != null ? quiz.course.title : 'Chưa có khóa học'}"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Bài học</p>
+                    <p class="text-sm font-semibold text-slate-800"
+                       th:text="${quiz.lesson != null ? quiz.lesson.title : 'Chưa có bài học'}"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Loại quiz</p>
+                    <p class="text-sm font-semibold text-slate-800" th:text="${quiz.type != null ? quiz.type : 'N/A'}"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Tổng số câu hỏi</p>
+                    <p class="text-sm font-semibold text-slate-800" th:text="${quiz.questions != null ? #lists.size(quiz.questions) : 0}"></p>
+                </div>
+            </div>
+
+            <!-- Nút xóa quiz - CHỈ HIỂN THỊ KHI CÓ ID -->
+            <div th:if="${quiz.id != null}" class="mt-6 pt-6 border-t border-slate-100 flex justify-end">
+                <form th:action="@{'/instructor/quiz/' + ${quiz.id} + '/delete'}"
+                      method="post"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này? Tất cả câu hỏi sẽ bị xóa theo.')">
+                    <button type="submit" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all">
+                        🗑️ Xóa quiz này
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Form thêm câu hỏi - CHỈ HIỂN THỊ KHI CÓ QUIZ -->
+        <div th:if="${quiz != null and quiz.id != null}" class="glass-card rounded-[2rem] shadow-sm p-8">
+            <h2 class="text-lg font-bold text-slate-700 mb-6 flex items-center">
+                <span class="mr-2">➕</span> Thêm câu hỏi mới
+            </h2>
+
+            <form th:action="@{'/instructor/quiz/' + ${quiz.id} + '/add-question'}"
+                  method="post"
+                  class="space-y-6"
+                  id="questionForm">
+
+                <!-- Câu hỏi -->
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-500 uppercase">Nội dung câu hỏi</label>
+                    <textarea name="questionText"
+                              rows="3"
+                              required
+                              class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                              placeholder="Nhập câu hỏi..."></textarea>
+                </div>
+
+                <!-- Giải thích -->
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-500 uppercase">Giải thích (tùy chọn)</label>
+                    <textarea name="explanation"
+                              rows="2"
+                              class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                              placeholder="Giải thích cho đáp án..."></textarea>
+                </div>
+
+                <!-- Các đáp án -->
+                <div class="space-y-4">
+                    <label class="text-xs font-black text-slate-500 uppercase">Đáp án</label>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div th:each="i : ${#numbers.sequence(1, 4)}" class="space-y-2">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600"
+                                      th:text="${i}"></span>
+                                <input type="text"
+                                       name="optionText"
+                                       required
+                                       class="flex-1 px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500"
+                                       th:placeholder="'Đáp án ' + ${i}"/>
+                                <label class="flex items-center gap-1 text-sm">
+                                    <input type="radio"
+                                           name="correctIndex"
+                                           th:value="${i-1}"
+                                           th:checked="${i == 1}"
+                                           class="w-4 h-4 text-indigo-600"/>
+                                    <span class="text-xs text-slate-600">Đúng</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút submit -->
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                            class="flex-1 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                        + Thêm câu hỏi
+                    </button>
+                    <button type="button"
+                            onclick="resetForm()"
+                            class="px-8 py-3 rounded-xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">
+                        Làm mới
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Danh sách câu hỏi -->
+        <div th:if="${quiz != null}" class="glass-card rounded-[2rem] shadow-sm p-8">
+            <h2 class="text-lg font-bold text-slate-700 mb-6 flex items-center">
+                <span class="mr-2">📝</span> Danh sách câu hỏi
+                <span class="ml-3 text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
+                      th:text="${quiz.questions != null ? #lists.size(quiz.questions) : 0} + ' câu hỏi'">
+                </span>
+            </h2>
+
+            <div th:if="${quiz.questions == null or quiz.questions.isEmpty()}"
+                 class="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                <span class="text-4xl mb-3 block">📭</span>
+                <p class="text-slate-500">Chưa có câu hỏi nào trong quiz này</p>
+                <p class="text-xs text-slate-400 mt-1">Hãy thêm câu hỏi đầu tiên để bắt đầu</p>
+            </div>
+
+            <div th:if="${quiz.questions != null and !quiz.questions.isEmpty()}"
+                 class="space-y-4">
+
+                <div th:each="question, qIter : ${quiz.questions}"
+                     class="bg-white border border-slate-100 rounded-2xl p-6 hover:shadow-md transition"
+                     th:id="'question-' + ${question.id}">
+
+                    <!-- Header câu hỏi -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center text-xs font-bold text-indigo-600"
+                                  th:text="${qIter.index + 1}"></span>
+                            <h3 class="font-bold text-slate-800" th:text="${question.questionText}"></h3>
+                        </div>
+
+                        <!-- Nút xóa câu hỏi -->
+                        <form th:action="@{'/instructor/question/' + ${question.id} + '/delete'}"
+                              method="post"
+                              onsubmit="return confirm('Xóa câu hỏi này?')">
+                            <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-bold">
+                                🗑️ Xóa
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Giải thích -->
+                    <div th:if="${question.explanation != null and !question.explanation.isEmpty()}"
+                         class="ml-9 mb-3 p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
+                        <span class="font-bold">💡 Giải thích:</span> <span th:text="${question.explanation}"></span>
+                    </div>
+
+                    <!-- Danh sách đáp án -->
+                    <div class="ml-9 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div th:each="option, oIter : ${question.options}"
+                             th:class="${'p-3 rounded-xl text-sm border ' +
+                                (option.correct ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50')}">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-400 w-5"
+                                      th:text="${oIter.index + 1 + '.'}"></span>
+                                <span th:text="${option.optionText}"
+                                      th:class="${option.correct ? 'font-bold text-emerald-700' : 'text-slate-600'}"></span>
+                                <span th:if="${option.correct}"
+                                      class="ml-auto text-[10px] bg-emerald-200 text-emerald-700 px-2 py-0.5 rounded-full">
+                                    Đáp án đúng
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút hoàn thành -->
+        <div th:if="${quiz != null and quiz.course != null}" class="flex justify-end gap-4 pt-4">
+            <a th:href="@{'/instructor/course/' + ${quiz.course.id}}"
+               class="px-8 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-all">
+                Hoàn thành
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function resetForm() {
+            document.getElementById('questionForm').reset();
+            // Mặc định chọn đáp án 1 là đúng
+            const radioButtons = document.querySelectorAll('input[name="correctIndex"]');
+            if (radioButtons.length > 0) {
+                radioButtons[0].checked = true;
+            }
+        }
+    </script>
+</main>
+</body>
+</html>

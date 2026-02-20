@@ -35,4 +35,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public List<Enrollment> getEnrollmentsByStatus(String status){
         return enrollmentRepository.findByPaymentStatus(status);
     }
+
+    @Override
+    public void updateProgress(Enrollment enrollment, Long lessonId) {
+
+    }
 }

@@ -10,6 +10,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .sidebar-gradient { background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%); }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #f1f5f9; }
+        .quiz-section {
+            background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fcd34d;
+        }
+        .difficulty-badge-easy { background: #10b981; color: white; }
+        .difficulty-badge-medium { background: #f59e0b; color: white; }
+        .difficulty-badge-hard { background: #ef4444; color: white; }
+        .status-generating { background: #93c5fd; color: #1e40af; }
+        .status-ready { background: #6ee7b7; color: #065f46; }
+        .status-failed { background: #fca5a5; color: #991b1b; }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -26,28 +36,44 @@
 <main class="flex-1 p-8">
     <div class="max-w-5xl mx-auto space-y-8">
 
+        <!-- Header với trạng thái -->
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Biên tập khóa học</h1>
-            <span th:if="${course.status == 'PENDING'}"
-                  class="bg-amber-100 text-amber-600 px-4 py-1 rounded-full text-xs font-bold animate-pulse">
-                ⏳ ĐANG CHỜ DUYỆT
-            </span>
-
-            <span th:if="${course.status == 'APPROVE'}"
-                  class="bg-emerald-100 text-emerald-600 px-4 py-1 rounded-full text-xs font-bold">
-                ✅ ĐÃ ĐƯỢC DUYỆT
-            </span>
-            <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold"
-                  th:text="${course.id == null ? 'Trạng thái: Đang tạo mới' : 'Trạng thái: Đang cập nhật'}"></span>
+            <div class="flex gap-2">
+                <span th:if="${course.status == 'PENDING'}"
+                      class="bg-amber-100 text-amber-600 px-4 py-1 rounded-full text-xs font-bold animate-pulse">
+                    ⏳ ĐANG CHỜ DUYỆT
+                </span>
+                <span th:if="${course.status == 'APPROVE'}"
+                      class="bg-emerald-100 text-emerald-600 px-4 py-1 rounded-full text-xs font-bold">
+                    ✅ ĐÃ ĐƯỢC DUYỆT
+                </span>
+                <span th:if="${course.status == 'FIX'}"
+                      class="bg-red-100 text-red-600 px-4 py-1 rounded-full text-xs font-bold animate-pulse">
+                    ❌ CẦN CHỈNH SỬA
+                </span>
+                <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold"
+                      th:text="${course.id == null ? 'Trạng thái: Đang tạo mới' : 'Trạng thái: Đang cập nhật'}"></span>
+            </div>
         </div>
 
+        <!-- Thông báo -->
+        <div th:if="${success}" class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-2xl text-emerald-700 font-bold text-sm">
+            🎉 [[${success}]]
+        </div>
+        <div th:if="${error}" class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-2xl text-red-700 font-bold text-sm">
+            ❌ [[${error}]]
+        </div>
+
+        <!-- Card thông tin khóa học -->
         <div class="glass-card rounded-[2rem] shadow-sm p-8">
             <h2 class="text-lg font-bold text-slate-700 mb-6 flex items-center">
                 <span class="mr-2">📝</span> 1. Thông tin tổng quan
             </h2>
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Biên tập khóa học</h1>
 
+            <!-- Nút xóa khóa học -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Biên tập khóa học</h1>
                 <form th:if="${course.id != null}"
                       th:action="@{/instructor/course/delete/{id}(id=${course.id})}"
                       method="post"
@@ -57,6 +83,8 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Form thông tin khóa học -->
             <form th:action="@{/instructor/save-course}" th:object="${course}" method="post" class="space-y-6">
                 <input type="hidden" th:field="*{id}">
                 <div class="space-y-2">
@@ -83,12 +111,18 @@
             </form>
         </div>
 
+        <!-- Phần quản lý bài học và quiz (chỉ hiển thị khi đã có course ID) -->
         <div th:if="${course.id != null}" class="glass-card rounded-[2rem] shadow-sm p-8">
             <h2 class="text-lg font-bold text-slate-700 mb-6 flex items-center">
-                <span class="mr-2">🎥</span> 2. Nội dung bài giảng & Video
+                <span class="mr-2">🎥</span> 2. Nội dung bài giảng & Quiz
             </h2>
 
+            <!-- Form thêm bài học mới -->
             <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 mb-8">
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center">
+                    <span class="w-6 h-6 bg-indigo-100 rounded-full text-indigo-600 inline-flex items-center justify-center text-xs mr-2">+</span>
+                    Thêm bài học mới
+                </h3>
                 <form th:action="@{/instructor/course/{id}/add-lesson(id=${course.id})}" method="post" class="space-y-4">
                     <input type="hidden" name="lessonId" id="lessonIdInput">
 
@@ -109,76 +143,179 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <button type="submit" id="submitBtn" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold">
+                        <button type="submit" id="submitBtn" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-900 transition">
                             + Xuất bản bài học
                         </button>
-                        <button type="button" id="cancelEditBtn" onclick="resetLessonForm()" class="hidden bg-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold">
+                        <button type="button" id="cancelEditBtn" onclick="resetLessonForm()" class="hidden bg-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-300 transition">
                             Hủy sửa
                         </button>
                     </div>
                 </form>
-                <div th:each="lesson : ${course.lessons}" class="mt-4 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
-                    <div class="flex gap-4">
-                        <div class="w-1/3 aspect-video bg-black rounded-lg overflow-hidden">
-                            <iframe class="w-full h-full"
-                                    th:if="${lesson.videoUrl != null}"
-                                    th:src="${'https://www.youtube.com/embed/' + lesson.videoUrl}"
-                                    frameborder="0" allowfullscreen>
-                            </iframe>
-                        </div>
-                        <div class="w-2/3">
-                            <h4 class="font-bold text-slate-800" th:text="${lesson.title}"></h4>
-                            <p class="text-xs text-slate-500 line-clamp-3 mt-2" th:text="${lesson.content}"></p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
+            <!-- Danh sách bài học -->
             <div class="space-y-4">
-                <h3 class="font-bold text-slate-800 text-sm mb-4">Danh sách bài học hiện tại:</h3>
+                <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center">
+                    <span class="mr-2">📚</span> Danh sách bài học hiện tại:
+                </h3>
 
-                <div th:each="lesson : ${course.lessons}" class="group bg-white border border-slate-100 p-5 rounded-2xl flex flex-col md:flex-row gap-6 hover:shadow-md transition">
-                    <div class="w-full md:w-48 h-28 bg-black rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
-                        <div th:if="${lesson.videoUrl != null and !lesson.videoUrl.isEmpty()}">
-                            <span class="text-white text-[10px] font-bold opacity-50">Video Ready 🎥</span>
+                <div th:each="lesson, iterStat : ${course.lessons}" class="group bg-white border border-slate-100 p-5 rounded-2xl flex flex-col hover:shadow-md transition">
+                    <!-- Header bài học -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+                                [[${iterStat.index + 1}]]
+                            </span>
+                            <h4 class="font-bold text-slate-800" th:text="${lesson.title}"></h4>
                         </div>
-                        <span th:unless="${lesson.videoUrl != null and !lesson.videoUrl.isEmpty()}" class="text-white text-[10px] opacity-30">No Video</span>
+                        <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded tracking-tighter uppercase">
+                            Bài học
+                        </span>
                     </div>
 
-                    <div class="flex-1">
-                        <div class="flex justify-between">
-                            <h4 class="font-bold text-slate-800" th:text="${lesson.title}"></h4>
-                            <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded tracking-tighter uppercase">Đã lưu</span>
+                    <!-- Nội dung bài học -->
+                    <div class="ml-10 mb-4">
+                        <p class="text-sm text-slate-600 line-clamp-2" th:text="${lesson.content}"></p>
+                        <div th:if="${lesson.videoUrl}" class="mt-2 text-xs text-indigo-600">
+                            📺 Có video kèm theo
                         </div>
-                        <p class="text-xs text-slate-500 mt-2 line-clamp-2" th:text="${lesson.content}"></p>
-                        <div class="mt-4 flex space-x-3">
-                            <button type="button"
-                                    class="btn-edit-lesson ..."
-                                    th:data-id="${lesson.id}"
-                                    th:data-title="${lesson.title}"
-                                    th:data-content="${lesson.content}"
-                                    th:data-video="${lesson.videoUrl}">
-                                Sửa nhanh
-                            </button>
+                    </div>
 
-                            <form th:action="@{/instructor/course/{cId}/delete-lesson/{lId}(cId=${course.id}, lId=${lesson.id})}"
+                    <!-- Phần Quiz của bài học (Mỗi lesson chỉ có 1 quiz) -->
+                    <div class="ml-10 mt-3 border-t border-slate-100 pt-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-amber-600 flex items-center">
+                                <span class="mr-1">📝</span> Quiz:
+                            </span>
+
+                            <!-- Chỉ hiển thị nút tạo quiz nếu lesson CHƯA có quiz -->
+                            <form th:if="${lesson.quiz == null}"
+                                  th:action="@{'/instructor/lesson/' + ${lesson.id} + '/create-quiz'}"
                                   method="post"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này?')">
-                                <button type="submit" class="text-[10px] font-bold text-red-400 hover:underline">
-                                    Xóa bài
+                                  class="flex items-center gap-2">
+                                <select name="difficulty"
+                                        class="text-xs border rounded-lg px-2 py-1.5 bg-white focus:ring-2 focus:ring-amber-500 outline-none">
+                                    <option value="EASY">🌟 Dễ</option>
+                                    <option value="MEDIUM">⚡ Trung bình</option>
+                                    <option value="HARD">🔥 Khó</option>
+                                </select>
+                                <button type="submit"
+                                        class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center">
+                                    <span class="mr-1">+</span> Tạo quiz
                                 </button>
                             </form>
+
+                            <!-- Hiển thị thông báo đã có quiz -->
+                            <span th:if="${lesson.quiz != null}"
+                                  class="text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg font-bold">
+                                ✅ Đã tạo quiz
+                            </span>
                         </div>
+
+                        <!-- Hiển thị chi tiết quiz đã có -->
+                        <div th:if="${lesson.quiz != null}"
+                             class="bg-amber-50/50 border border-amber-200 rounded-xl p-4">
+
+                            <!-- Thông tin quiz -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-amber-700">Quiz ID: #[[${lesson.quiz.id}]]</span>
+                                    <span th:class="${'text-[10px] px-2 py-1 rounded-full font-bold ' +
+                                        (lesson.quiz.difficulty == 'EASY' ? 'bg-emerald-100 text-emerald-700' :
+                                         (lesson.quiz.difficulty == 'MEDIUM' ? 'bg-amber-100 text-amber-700' :
+                                          'bg-red-100 text-red-700'))}"
+                                          th:text="${lesson.quiz.difficulty}">
+                                    </span>
+                                </div>
+
+                                <!-- Badge trạng thái quiz -->
+                                <span th:class="${'text-[10px] px-2 py-1 rounded-full font-bold ' +
+                                    (lesson.quiz.status == 'GENERATING' ? 'bg-blue-100 text-blue-700' :
+                                     (lesson.quiz.status == 'READY' ? 'bg-emerald-100 text-emerald-700' :
+                                      'bg-red-100 text-red-700'))}"
+                                      th:text="${lesson.quiz.status}">
+                                </span>
+                            </div>
+
+                            <!-- Loại quiz -->
+                            <div class="mb-3">
+                                <span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold"
+                                      th:text="${lesson.quiz.type}">
+                                </span>
+                                <span class="text-xs text-slate-500 ml-2"
+                                      th:text="${lesson.quiz.questions != null ? #lists.size(lesson.quiz.questions) : 0} + ' câu hỏi'">
+                                </span>
+                            </div>
+
+                            <!-- Nút quản lý quiz -->
+                            <div class="flex gap-2 mt-3">
+                                <a th:href="@{'/instructor/quiz/' + ${lesson.quiz.id} + '/edit'}"
+                                   class="flex-1 text-center text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-100 transition">
+                                    ✏️ Quản lý câu hỏi
+                                </a>
+
+                                <!-- Form xóa quiz (nếu cần) -->
+                                <form th:action="@{'/instructor/quiz/' + ${lesson.quiz.id} + '/delete'}"
+                                      method="post"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này?')">
+                                    <button type="submit"
+                                            class="text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Hiển thị vài câu hỏi mẫu (nếu có) -->
+                            <div th:if="${lesson.quiz.questions != null and !lesson.quiz.questions.isEmpty()}"
+                                 class="mt-3 border-t border-amber-200 pt-3">
+                                <p class="text-[10px] font-bold text-amber-700 mb-2">Câu hỏi mẫu:</p>
+                                <div th:each="question, qIter : ${lesson.quiz.questions}" th:if="${qIter.index < 2}"
+                                     class="text-xs text-slate-600 mb-1">
+                                    <span class="font-bold" th:text="${qIter.index + 1 + '.'}"></span>
+                                    <span th:text="${question.questionText}"></span>
+                                </div>
+                                <p th:if="${#lists.size(lesson.quiz.questions) > 2}"
+                                   class="text-[10px] text-slate-400 italic mt-1">
+                                    ... và [[${#lists.size(lesson.quiz.questions) - 2}]] câu hỏi khác
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Thông báo chưa có quiz -->
+                        <div th:if="${lesson.quiz == null}"
+                             class="text-xs text-slate-400 italic p-2">
+                            Chưa có quiz nào cho bài học này. Hãy tạo quiz AI để kiểm tra kiến thức học viên!
+                        </div>
+                    </div>
+
+                    <!-- Nút thao tác bài học -->
+                    <div class="ml-10 mt-3 flex space-x-3">
+                        <button type="button"
+                                class="btn-edit-lesson text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center"
+                                th:data-id="${lesson.id}"
+                                th:data-title="${lesson.title}"
+                                th:data-content="${lesson.content}"
+                                th:data-video="${lesson.videoUrl}">
+                            <span class="mr-1">✏️</span> Sửa bài học
+                        </button>
+
+                        <form th:action="@{/instructor/course/{cId}/delete-lesson/{lId}(cId=${course.id}, lId=${lesson.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này?')">
+                            <button type="submit" class="text-[10px] font-bold text-red-400 hover:text-red-600 transition flex items-center">
+                                <span class="mr-1">🗑️</span> Xóa bài
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-        // Đưa hàm này ra ngoài cùng để HTML có thể gọi được
+        // Hàm reset form bài học
         function resetLessonForm() {
             document.getElementById('lessonIdInput').value = "";
-            // Lưu ý: Nếu trang có nhiều form, hãy chỉ định rõ ID form lesson
             const form = document.getElementById('lessonIdInput').closest('form');
             form.reset();
 
@@ -188,6 +325,7 @@
             document.getElementById('cancelEditBtn').classList.add('hidden');
         }
 
+        // Xử lý nút sửa bài học
         document.addEventListener('DOMContentLoaded', function() {
             const editButtons = document.querySelectorAll('.btn-edit-lesson');
 
@@ -201,10 +339,18 @@
                     // Điền dữ liệu
                     document.getElementById('lessonIdInput').value = id;
                     document.getElementById('lessonTitleInput').value = title;
-
-                    // Sửa lỗi: Phải dùng ID để gán chính xác
                     document.getElementById('lessonContentInput').value = content;
-                    document.getElementById('lessonVideoInput').value = video ? "https://www.youtube.com/watch?v=" + video : "";
+
+                    // Xử lý video URL
+                    if (video && video !== 'null') {
+                        if (video.startsWith('http')) {
+                            document.getElementById('lessonVideoInput').value = video;
+                        } else {
+                            document.getElementById('lessonVideoInput').value = "https://www.youtube.com/watch?v=" + video;
+                        }
+                    } else {
+                        document.getElementById('lessonVideoInput').value = "";
+                    }
 
                     // Đổi trạng thái nút
                     document.getElementById('submitBtn').innerText = "✅ Cập nhật bài học";

@@ -23,12 +23,27 @@ public class QuizAttempt {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
-    private AIQuiz quiz;
+    private Quiz quiz;
 
-    private Float score;
+    private Float score; // Điểm số (0-100)
+
+    private Integer totalQuestions; // Thêm trường này
+
+    private Integer correctAnswers; // Thêm trường này
 
     @Column(columnDefinition = "nvarchar(max)")
     private String aiFeedback;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Thêm method tiện ích
+    public String getScorePercentage() {
+        if (score == null) return "0%";
+        return Math.round(score) + "%";
+    }
+
+    public String getResultSummary() {
+        if (correctAnswers == null || totalQuestions == null) return "";
+        return correctAnswers + "/" + totalQuestions + " câu đúng";
+    }
 }

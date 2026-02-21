@@ -16,12 +16,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 @RequestMapping("/student")
@@ -172,7 +172,7 @@ public class StudentController {
         return "views/student/my-courses-list";
     }
 
-    // ============= TRANG HỌC TẬP =============
+//     ============= TRANG HỌC TẬP =============
     @GetMapping("/learning/{courseId}")
     public String startLearning(@PathVariable Long courseId,
                                 @AuthenticationPrincipal UserDetails userDetails,
@@ -265,42 +265,56 @@ public class StudentController {
     @PostMapping("/quiz/{quizId}/submit")
     public String submitQuiz(@PathVariable Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
-                             @RequestParam(value = "selectedOptions", required = false) List<Long> selectedOptions,
+                             @RequestParam(value = "selectedOptions") List<Long> selectedOptions,
                              RedirectAttributes redirectAttributes) {
-
-        // Log để debug
-        System.out.println("=== SUBMIT QUIZ ===");
-        System.out.println("Quiz ID: " + quizId);
-        System.out.println("Selected options: " + (selectedOptions != null ? selectedOptions : "null"));
-
-        if (selectedOptions == null || selectedOptions.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Bạn chưa chọn đáp án nào!");
-            return "redirect:/student/quiz/" + quizId + "/take";
-        }
 
         User user = userService.findByEmail(userDetails.getUsername());
         Quiz quiz = quizRepository.findByIdWithQuestionsAndOptions(quizId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
 
+        // Kiểm tra questions không null
+        if (quiz.getQuestions() == null || quiz.getQuestions().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Quiz không có câu hỏi nào!");
+            return "redirect:/student/quiz/" + quizId + "/take";
+        }
+
         // Tính điểm
         int totalQuestions = quiz.getQuestions().size();
         int correctCount = 0;
 
-        for (Question question : quiz.getQuestions()) {
-            Option correctOption = question.getOptions().stream()
-                    .filter(Option::isCorrect)
-                    .findFirst()
-                    .orElse(null);
+        // Tạo map lưu đáp án đã chọn
+        Map<Long, Long> answerMap = new HashMap<>();
 
-            if (correctOption != null && selectedOptions.contains(correctOption.getId())) {
-                correctCount++;
+        // Dùng Iterator hoặc for-each để tránh lỗi index
+        int index = 0;
+        for (Question question : quiz.getQuestions()) {
+            if (index < selectedOptions.size()) {
+                Long selectedOptionId = selectedOptions.get(index);
+                answerMap.put(question.getId(), selectedOptionId);
+
+                // Kiểm tra đúng sai
+                Option correctOption = question.getOptions().stream()
+                        .filter(Option::isCorrect)
+                        .findFirst()
+                        .orElse(null);
+
+                if (correctOption != null && correctOption.getId().equals(selectedOptionId)) {
+                    correctCount++;
+                }
             }
+            index++;
         }
 
-        float score = (float) correctCount / totalQuestions * 100;
+        float score = totalQuestions > 0 ? (float) correctCount / totalQuestions * 100 : 0;
 
-        // Tạo feedback
-        String feedback = generateFeedback(score);
+        // Convert map sang JSON
+        ObjectMapper mapper = new ObjectMapper();
+        String answersJson = "";
+        try {
+            answersJson = mapper.writeValueAsString(answerMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Lưu kết quả
         QuizAttempt attempt = new QuizAttempt();
@@ -309,7 +323,8 @@ public class StudentController {
         attempt.setScore(score);
         attempt.setTotalQuestions(totalQuestions);
         attempt.setCorrectAnswers(correctCount);
-        attempt.setAiFeedback(feedback);
+        attempt.setAiFeedback(generateFeedback(score));
+        attempt.setAnswersJson(answersJson);
         attempt.setCreatedAt(LocalDateTime.now());
 
         quizAttemptRepository.save(attempt);
@@ -349,7 +364,7 @@ public class StudentController {
                              @AuthenticationPrincipal UserDetails userDetails,
                              Model model) {
 
-        User user = userService.findByEmail(userDetails.getUsername()); // Đổi tên biến
+        User user = userService.findByEmail(userDetails.getUsername());
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kết quả"));
 
@@ -357,12 +372,26 @@ public class StudentController {
             throw new RuntimeException("Bạn không có quyền xem kết quả này");
         }
 
+        Quiz quiz = quizRepository.findByIdWithQuestionsAndOptions(attempt.getQuiz().getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
+
+        // Parse JSON đáp án
+        Map<Long, Long> selectedAnswers = new HashMap<>();
+        if (attempt.getAnswersJson() != null && !attempt.getAnswersJson().isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                selectedAnswers = mapper.readValue(attempt.getAnswersJson(), new TypeReference<Map<Long, Long>>() {});
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         model.addAttribute("attempt", attempt);
-        model.addAttribute("quiz", attempt.getQuiz());
+        model.addAttribute("quiz", quiz);
+        model.addAttribute("selectedAnswers", selectedAnswers);
 
         return "views/student/quiz-review";
     }
-
     /**
      * API cập nhật tiến độ bài học (cho AJAX)
      */
@@ -400,4 +429,24 @@ public class StudentController {
             return "Cần cố gắng hơn. Đừng nản, hãy học lại bài học và thử quiz một lần nữa!";
         }
     }
+
+    @PostMapping("/quiz/{quizId}/retake")
+    public String retakeQuiz(@PathVariable Long quizId,
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             RedirectAttributes redirectAttributes) {
+
+        User user = userService.findByEmail(userDetails.getUsername());
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
+
+        // Tìm và xóa kết quả cũ
+        Optional<QuizAttempt> existingAttempt = quizAttemptRepository.findByUserAndQuiz(user, quiz);
+        if (existingAttempt.isPresent()) {
+            quizAttemptRepository.delete(existingAttempt.get());
+        }
+
+        redirectAttributes.addFlashAttribute("info", "Bạn có thể làm lại quiz!");
+        return "redirect:/student/quiz/" + quizId + "/take";
+    }
+
 }

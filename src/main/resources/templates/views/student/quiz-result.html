@@ -159,10 +159,15 @@
         <span>📚</span> Tiếp tục học
       </a>
 
-      <a th:href="@{'/student/quiz/' + ${quiz.id} + '/take'}"
-         class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-        <span>🔄</span> Làm lại quiz
-      </a>
+      <!-- Nút làm lại quiz - SỬA THÀNH FORM POST -->
+      <form th:action="@{'/student/quiz/' + ${quiz.id} + '/retake'}"
+            method="post"
+            onsubmit="return confirm('Bạn có chắc muốn làm lại quiz? Kết quả hiện tại sẽ bị xóa.')">
+        <button type="submit"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 w-full">
+          <span>🔄</span> Làm lại quiz
+        </button>
+      </form>
     </div>
   </div>
 

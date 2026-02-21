@@ -36,6 +36,9 @@ public class QuizAttempt {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(columnDefinition = "TEXT")
+    private String answersJson; // Lưu đáp án dạng JSON
+
     // Thêm method tiện ích
     public String getScorePercentage() {
         if (score == null) return "0%";

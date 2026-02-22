@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Detail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen p-10">
+
+<div class="max-w-5xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800"
+                th:text="${quiz.title}">Quiz Title</h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Difficulty:
+                <span class="font-semibold"
+                      th:text="${quiz.difficulty}">Easy</span>
+            </p>
+        </div>
+
+        <a th:href="@{/instructor/course/{id}(id=${quiz.lesson.course.id})}"
+           class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
+            ← Quay về khóa học
+        </a>
+    </div>
+
+    <!-- FLASH MESSAGE -->
+    <div th:if="${success}"
+         class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded-xl font-semibold">
+        [[${success}]]
+    </div>
+
+    <div th:if="${error}"
+         class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl font-semibold">
+        [[${error}]]
+    </div>
+
+    <!-- ADD QUESTION FORM -->
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-10">
+        <h2 class="text-lg font-bold mb-4">Thêm câu hỏi mới</h2>
+
+        <form th:action="@{'/instructor/quiz/' + ${quiz.id} + '/add-question'}"
+              method="post"
+              class="space-y-4">
+
+            <input type="text"
+                   name="questionText"
+                   placeholder="Nhập câu hỏi..."
+                   required
+                   class="w-full border rounded-xl px-4 py-2">
+
+            <!-- OPTIONS -->
+            <div class="space-y-3">
+
+                <div class="flex items-center gap-3">
+                    <input type="text" name="optionText"
+                           placeholder="Đáp án 1"
+                           required
+                           class="flex-1 border rounded-xl px-4 py-2">
+                    <input type="radio" name="correctIndex" value="0" required>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input type="text" name="optionText"
+                           placeholder="Đáp án 2"
+                           required
+                           class="flex-1 border rounded-xl px-4 py-2">
+                    <input type="radio" name="correctIndex" value="1">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input type="text" name="optionText"
+                           placeholder="Đáp án 3"
+                           required
+                           class="flex-1 border rounded-xl px-4 py-2">
+                    <input type="radio" name="correctIndex" value="2">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input type="text" name="optionText"
+                           placeholder="Đáp án 4"
+                           required
+                           class="flex-1 border rounded-xl px-4 py-2">
+                    <input type="radio" name="correctIndex" value="3">
+                </div>
+
+            </div>
+
+            <button type="submit"
+                    class="bg-indigo-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                Thêm câu hỏi
+            </button>
+
+        </form>
+    </div>
+
+    <!-- QUESTION LIST -->
+    <div>
+        <h2 class="text-lg font-bold mb-4">Danh sách câu hỏi</h2>
+
+        <div th:if="${questions == null or questions.isEmpty()}"
+             class="bg-white p-6 rounded-2xl shadow text-slate-400 text-center">
+            Chưa có câu hỏi nào.
+        </div>
+
+        <div th:each="question : ${questions}"
+             class="bg-white p-6 rounded-2xl shadow mb-4">
+
+            <h3 class="font-semibold text-slate-800"
+                th:text="${question.questionText}">
+                Question text
+            </h3>
+
+            <ul class="mt-3 space-y-2">
+                <li th:each="opt : ${question.options}"
+                    class="flex items-center gap-2">
+
+                    <span th:text="${opt.optionText}"
+                          class="text-slate-700">
+                        Option
+                    </span>
+
+                    <span th:if="${opt.correct}"
+                          class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-semibold">
+                        Đúng
+                    </span>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

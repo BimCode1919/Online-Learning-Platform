@@ -9,4 +9,5 @@ public interface EnrollmentService {
     void save(Enrollment enrollment);
     List<Enrollment> findByUserIdAndPaymentStatus(Long id, String status);
     List<Enrollment> getEnrollmentsByStatus(String status);
+    void updateProgress(Enrollment enrollment, Long lessonId);
 }

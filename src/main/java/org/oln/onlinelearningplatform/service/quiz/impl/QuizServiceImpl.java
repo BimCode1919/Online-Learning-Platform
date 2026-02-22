@@ -1,4 +1,90 @@
 package org.oln.onlinelearningplatform.service.quiz.impl;
 
-public class QuizServiceImpl {
+import org.oln.onlinelearningplatform.entity.Lesson;
+import org.oln.onlinelearningplatform.entity.Question;
+import org.oln.onlinelearningplatform.entity.Quiz;
+import org.oln.onlinelearningplatform.repository.LessonRepository;
+import org.oln.onlinelearningplatform.repository.OptionRepository;
+import org.oln.onlinelearningplatform.repository.QuestionRepository;
+import org.oln.onlinelearningplatform.repository.QuizRepository;
+import org.oln.onlinelearningplatform.service.quiz.QuizService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class QuizServiceImpl implements QuizService {
+
+    private final QuizRepository quizRepository;
+    private final LessonRepository lessonRepository;
+    private final QuestionRepository questionRepository;
+    private final OptionRepository optionRepository;
+
+    public QuizServiceImpl(LessonRepository lessonRepository, QuizRepository quizRepository, QuestionRepository questionRepository, OptionRepository optionRepository) {
+        this.lessonRepository = lessonRepository;
+        this.quizRepository = quizRepository;
+        this.questionRepository = questionRepository;
+        this.optionRepository = optionRepository;
+    }
+
+    @Override
+    @Transactional
+    public Quiz createQuizForLesson(Long lessonId, String difficulty) {
+        // Lấy lesson
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lesson với ID: " + lessonId));
+
+        // Kiểm tra xem lesson đã có quiz chưa
+        if (lesson.getQuiz() != null) {
+            throw new RuntimeException("Bài học này đã có quiz rồi!");
+        }
+
+        // Tạo quiz mới - CHỈNH SỬA Ở ĐÂY
+        Quiz quiz = new Quiz();
+        quiz.setTitle("Quiz cho bài: " + lesson.getTitle());
+        quiz.setType(Quiz.QuizType.MANUAL);        // Đổi thành MANUAL
+        quiz.setStatus(Quiz.QuizStatus.READY);      // Đổi thành READY (vì instructor tự nhập)
+        quiz.setDifficulty(difficulty);
+        quiz.setCourse(lesson.getCourse());
+        quiz.setLesson(lesson);
+
+        // Lưu quiz
+        Quiz savedQuiz = quizRepository.save(quiz);
+
+        // Set quiz cho lesson
+        lesson.setQuiz(savedQuiz);
+        lessonRepository.save(lesson);
+
+        return savedQuiz;
+    }
+
+    @Override
+    @Transactional
+    public void deleteQuiz(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quiz"));
+
+        // QUAN TRỌNG: Xóa tham chiếu từ lesson trước
+        Lesson lesson = quiz.getLesson();
+        if (lesson != null) {
+            lesson.setQuiz(null);
+            lessonRepository.save(lesson);
+        }
+
+        // Xóa tất cả options và questions
+        if (quiz.getQuestions() != null) {
+            for (Question question : quiz.getQuestions()) {
+                if (question.getOptions() != null) {
+                    optionRepository.deleteAll(question.getOptions());
+                }
+            }
+            questionRepository.deleteAll(quiz.getQuestions());
+        }
+
+        // Cuối cùng xóa quiz
+        quizRepository.delete(quiz);
+    }
 }
+
+
+

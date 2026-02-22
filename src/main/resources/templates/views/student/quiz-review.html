@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Xem lại bài làm | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .review-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #334155;
+        }
+        .question-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+        .option-item {
+            background: #0f172a;
+            border: 2px solid #334155;
+            transition: all 0.2s ease;
+        }
+        .option-item.selected {
+            border-color: #6366f1;
+            background: linear-gradient(145deg, #4f46e5, #6366f1);
+        }
+        .option-item.selected .option-text {
+            color: white;
+        }
+        .option-item.selected .option-letter {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: #1e293b;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+        .badge-selected {
+            background: #6366f1;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Navigation -->
+<nav class="bg-[#1e293b] border-b border-slate-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a th:href="@{'/student/quiz/result/' + ${attempt.id}}"
+               class="text-slate-400 hover:text-white transition flex items-center gap-2">
+                <span class="text-xl">←</span>
+                <span class="text-sm font-bold">Quay lại kết quả</span>
+            </a>
+            <div class="h-6 w-px bg-slate-700"></div>
+            <div>
+                <h1 class="text-white font-bold text-sm" th:text="${quiz.lesson.course.title}">Tên khóa học</h1>
+                <p class="text-xs text-indigo-400" th:text="'Bài: ' + ${quiz.lesson.title}">Tên bài học</p>
+            </div>
+        </div>
+
+        <!-- Điểm số tổng quan -->
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-slate-400">Điểm:</span>
+            <span class="text-xl font-bold text-white" th:text="${#numbers.formatDecimal(attempt.score, 0, 1)} + '%'"></span>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-4xl mx-auto py-8 px-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-black text-white mb-2">Xem lại bài làm</h1>
+        <p class="text-slate-400">
+            <span th:text="'Quiz: ' + ${quiz.title}"></span>
+        </p>
+        <p class="text-sm text-indigo-400 mt-2">
+            📝 Đây là những đáp án bạn đã chọn trong bài làm
+        </p>
+    </div>
+
+    <!-- Danh sách câu hỏi -->
+    <div class="space-y-4">
+        <div th:each="question, qIter : ${quiz.questions}"
+             th:with="selectedOptionId = ${selectedAnswers[question.id]}"
+             class="question-card rounded-2xl p-6">
+
+            <!-- Header câu hỏi -->
+            <div class="flex items-start gap-3 mb-4">
+                <span class="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                      th:text="${qIter.index + 1}"></span>
+                <h3 class="text-white font-bold text-lg" th:text="${question.questionText}">Câu hỏi</h3>
+            </div>
+
+            <!-- Danh sách đáp án -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-10">
+                <div th:each="option, oIter : ${question.options}"
+                     th:with="isSelected = ${selectedOptionId == option.id}"
+                     class="option-item rounded-xl p-4 flex items-center gap-3"
+                     th:classappend="${isSelected ? 'selected' : ''}">
+
+                    <!-- Số thứ tự option -->
+                    <span class="option-letter" th:text="${oIter.index + 1}">A</span>
+
+                    <!-- Nội dung đáp án -->
+                    <span class="option-text text-slate-300 flex-1 text-sm" th:text="${option.optionText}">Đáp án</span>
+
+                    <!-- Icon đã chọn -->
+                    <span th:if="${isSelected}" class="text-white text-sm font-bold ml-auto">✓</span>
+                </div>
+            </div>
+
+            <!-- Thông báo nếu chưa chọn đáp án -->
+            <div th:if="${selectedOptionId == null}" class="mt-3 ml-10 text-sm text-amber-500">
+                ⚠️ Bạn chưa chọn đáp án cho câu này
+            </div>
+        </div>
+    </div>
+
+    <!-- Nút điều hướng cuối trang -->
+    <div class="mt-8 flex justify-between items-center">
+        <a th:href="@{'/student/quiz/result/' + ${attempt.id}}"
+           class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2">
+            <span>←</span> Quay lại kết quả
+        </a>
+
+        <div class="text-sm text-slate-400">
+            Đã chọn <span th:text="${selectedAnswers.size()}"></span>/<span th:text="${quiz.questions.size()}"></span> câu
+        </div>
+
+        <form th:action="@{'/student/quiz/' + ${quiz.id} + '/retake'}"
+              method="post"
+              onsubmit="return confirm('Bạn có chắc muốn làm lại quiz?')">
+            <button type="submit"
+                    class="bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2">
+                <span>🔄</span> Làm lại quiz
+            </button>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

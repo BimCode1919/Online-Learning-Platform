@@ -31,5 +31,5 @@ public class Lesson {
     private Course course;
 
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
-    private AIQuiz aiQuiz;
+    private Quiz quiz;
 }

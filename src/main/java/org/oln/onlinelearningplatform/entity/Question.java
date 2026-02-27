@@ -20,14 +20,14 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "nvarchar(255)")
     private String questionText;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "nvarchar(255)")
     private String explanation;
 
     @ManyToOne
-    @JoinColumn(name = "quiz_id")
+    @JoinColumn(name = "quiz_id", referencedColumnName = "id")
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)

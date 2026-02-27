@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class AIQuestionDTO {
-    private String questionText;
-    private String explanation;
-    private List<AIOptionDTO> options;
+@AllArgsConstructor
+public class AIQuizResponse {
+    private List<AIQuestionDTO> questions;
 }

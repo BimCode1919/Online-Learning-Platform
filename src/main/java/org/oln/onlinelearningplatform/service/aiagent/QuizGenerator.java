@@ -1,19 +1,24 @@
 package org.oln.onlinelearningplatform.service.aiagent;
 
-import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
-import org.oln.onlinelearningplatform.dto.AIQuestionDTO;
-
-import java.util.List;
 
 public interface QuizGenerator {
-
-    @SystemMessage("""
-        Bạn là trợ lý giáo dục chuyên nghiệp. 
-        Nhiệm vụ: Tạo câu hỏi trắc nghiệm từ nội dung bài học được cung cấp.
-        Yêu cầu: Trả về danh sách câu hỏi dưới dạng JSON. 
-        Mỗi câu hỏi có 4 lựa chọn, chỉ có 1 lựa chọn đúng.
+    @UserMessage("""
+        Dựa trên nội dung sau: {{content}}
+        Hãy tạo 5 câu hỏi trắc nghiệm. 
+        Bắt buộc trả về định dạng JSON thuần túy như sau (không được bao ngoài bởi ```json):
+        {
+          "questions": [
+            {
+              "questionText": "nội dung câu hỏi",
+              "explanation": "giải thích",
+              "options": [
+                {"optionText": "đáp án A", "correct": true},
+                {"optionText": "đáp án B", "correct": false}
+              ]
+            }
+          ]
+        }
         """)
-    @UserMessage("Hãy tạo 10 câu hỏi trắc nghiệm từ nội dung này: {{content}}")
-    List<AIQuestionDTO> generate(String content);
+    String generate(String content);
 }

@@ -63,7 +63,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-google-ai-gemini</artifactId>
-            <version>1.10.0</version>
+            <version>0.35.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-            <version>1.11.0</version>
+            <version>0.35.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -97,6 +97,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.22.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

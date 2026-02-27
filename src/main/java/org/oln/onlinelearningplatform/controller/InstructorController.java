@@ -9,6 +9,8 @@ import org.oln.onlinelearningplatform.entity.User;
 import org.oln.onlinelearningplatform.repository.CourseRepository;
 import org.oln.onlinelearningplatform.repository.LessonRepository;
 import org.oln.onlinelearningplatform.repository.QuizRepository;
+import org.oln.onlinelearningplatform.service.aiagent.AIQuizService;
+import org.oln.onlinelearningplatform.service.aiagent.YouTubeService;
 import org.oln.onlinelearningplatform.service.course.CourseService;
 import org.oln.onlinelearningplatform.service.quiz.QuestionService;
 import org.oln.onlinelearningplatform.service.quiz.QuizService;
@@ -35,6 +37,8 @@ public class InstructorController {
     private final QuestionService questionService;
     private final LessonRepository lessonRepository;
     private final QuizRepository quizRepository;
+    private final AIQuizService aiQuizService;
+    private final YouTubeService youTubeService;
 
     public InstructorController(CourseService courseService,
                                 CourseRepository courseRepository,
@@ -42,7 +46,7 @@ public class InstructorController {
                                 QuizService quizService,
                                 QuestionService questionService,
                                 LessonRepository lessonRepository,
-                                QuizRepository quizRepository) {
+                                QuizRepository quizRepository, AIQuizService aiQuizService, YouTubeService youTubeService) {
         this.courseService = courseService;
         this.courseRepository = courseRepository;
         this.userService = userService;
@@ -50,6 +54,8 @@ public class InstructorController {
         this.questionService = questionService;
         this.lessonRepository = lessonRepository;
         this.quizRepository = quizRepository;
+        this.aiQuizService = aiQuizService;
+        this.youTubeService = youTubeService;
     }
 
     // Dashboard
@@ -248,6 +254,38 @@ public class InstructorController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             return "redirect:/instructor/dashboard";
+        }
+    }
+
+    @PostMapping("/generate-from-youtube")
+    public String generateFromYoutube(@RequestParam("lessonId") Long lessonId,
+                                      @RequestParam("youtubeUrl") String youtubeUrl,
+                                      RedirectAttributes redirectAttributes) {
+        Long courseId = null;
+        try {
+            // 0. Lấy thông tin bài học để biết courseId (dùng cho việc redirect nếu lỗi)
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
+            courseId = lesson.getCourse().getId();
+
+            // 1. Trích xuất Transcript từ YouTube
+            String transcript = youTubeService.getTranscript(youtubeUrl);
+
+            // 2. Gọi AI xử lý transcript và lưu vào Database
+            // Lưu ý: Đảm bảo phương thức này bên Service đã xử lý convertOptions như mình đã viết
+            aiQuizService.createQuizFromYoutubeContent(lessonId, transcript);
+
+            // 3. Thông báo thành công (Dùng "success" để khớp với các hàm khác trong Controller)
+            redirectAttributes.addFlashAttribute("success", "AI đã soạn 10 câu hỏi trắc nghiệm dựa trên video thành công!");
+
+            return "redirect:/instructor/course/" + courseId;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi AI: " + e.getMessage());
+
+            // Nếu có courseId thì về trang edit course, không thì về dashboard
+            return (courseId != null) ? "redirect:/instructor/course/" + courseId : "redirect:/instructor/dashboard";
         }
     }
 }

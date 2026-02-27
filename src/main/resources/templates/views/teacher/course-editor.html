@@ -189,21 +189,41 @@
                             </span>
 
                             <!-- Chỉ hiển thị nút tạo quiz nếu lesson CHƯA có quiz -->
-                            <form th:if="${lesson.quiz == null}"
-                                  th:action="@{'/instructor/lesson/' + ${lesson.id} + '/create-quiz'}"
-                                  method="post"
-                                  class="flex items-center gap-2">
-                                <select name="difficulty"
-                                        class="text-xs border rounded-lg px-2 py-1.5 bg-white focus:ring-2 focus:ring-amber-500 outline-none">
-                                    <option value="EASY">🌟 Dễ</option>
-                                    <option value="MEDIUM">⚡ Trung bình</option>
-                                    <option value="HARD">🔥 Khó</option>
-                                </select>
-                                <button type="submit"
-                                        class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center">
-                                    <span class="mr-1">+</span> Tạo quiz
-                                </button>
-                            </form>
+                            <div th:if="${lesson.quiz == null}" class="flex flex-col gap-3">
+                                <form th:action="@{'/instructor/lesson/' + ${lesson.id} + '/create-quiz'}"
+                                      method="post" class="flex items-center gap-2">
+                                    <select name="difficulty" class="text-[10px] border rounded-lg px-2 py-1 bg-white outline-none">
+                                        <option value="EASY">🌟 Dễ</option>
+                                        <option value="MEDIUM">⚡ Vừa</option>
+                                        <option value="HARD">🔥 Khó</option>
+                                    </select>
+                                    <button type="submit" class="bg-slate-100 text-slate-600 text-[10px] px-3 py-1 rounded-lg font-bold hover:bg-slate-200 transition">
+                                        + Tạo thủ công
+                                    </button>
+                                </form>
+
+                                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mt-1">
+                                    <p class="text-[10px] font-black text-indigo-600 uppercase mb-2 flex items-center">
+                                        <span class="mr-1">🤖</span> AI Smart Generator (YouTube)
+                                    </p>
+                                    <form th:action="@{/instructor/generate-from-youtube}" method="post" class="flex flex-col gap-2">
+                                        <input type="hidden" name="lessonId" th:value="${lesson.id}">
+                                        <div class="flex gap-2">
+                                            <input type="text" name="youtubeUrl"
+                                                   th:value="${lesson.videoUrl}"
+                                                   class="flex-1 text-[10px] px-3 py-1.5 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                   placeholder="Dán ID hoặc Link YouTube..." required>
+                                            <button type="submit"
+                                                    onclick="startAIProcessing(this)"
+                                                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] px-4 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center whitespace-nowrap">
+                                                <span class="btn-text">Gen Quiz AI</span>
+                                                <span class="spinner hidden ml-1 w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                            </button>
+                                        </div>
+                                        <p class="text-[9px] text-indigo-400 italic">* Hệ thống sẽ tự đọc phụ đề video để soạn 10 câu hỏi.</p>
+                                    </form>
+                                </div>
+                            </div>
 
                             <!-- Hiển thị thông báo đã có quiz -->
                             <span th:if="${lesson.quiz != null}"
@@ -258,13 +278,8 @@
                                 <!-- Form xóa quiz (sửa lại) -->
                                 <form th:action="@{'/instructor/quiz/' + ${lesson.quiz.id} + '/delete'}"
                                       method="post"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này? Tất cả câu hỏi sẽ bị xóa theo.')">
-
-                                    <!-- Thêm CSRF token nếu Spring Security bật -->
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-                                    <button type="submit"
-                                            class="text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition">
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa quiz này?')">
+                                    <button type="submit" class="text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition">
                                         🗑️ Xóa quiz
                                     </button>
                                 </form>
@@ -367,6 +382,20 @@
                 });
             });
         });
+        function startAIProcessing(button) {
+            const form = button.closest('form');
+            if (!form.checkValidity()) return;
+
+            const text = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner');
+
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-not-allowed');
+            text.innerText = "AI đang đọc video...";
+            spinner.classList.remove('hidden');
+
+            form.submit();
+        }
     </script>
 </main>
 </body>

@@ -16,7 +16,7 @@ public class Option {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "nvarchar")
+    @Column(nullable = false, columnDefinition = "nvarchar(max)")
     private String optionText;
 
     @Column(nullable = false)

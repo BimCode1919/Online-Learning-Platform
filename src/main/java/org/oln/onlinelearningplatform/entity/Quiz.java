@@ -20,6 +20,7 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "nvarchar(max)")
     private String title;
 
     @Enumerated(EnumType.STRING)

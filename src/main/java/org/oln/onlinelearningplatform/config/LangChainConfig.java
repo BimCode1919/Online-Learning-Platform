@@ -23,7 +23,7 @@ public class LangChainConfig {
         // Trả về thẳng ChatModel để tương thích với AiServices
         return GoogleAiGeminiChatModel.builder()
                 .apiKey(apiKey)
-                .modelName("gemini-flash-latest")
+                .modelName("gemini-2.5-flash")
                 .timeout(java.time.Duration.ofSeconds(60))
                 .logRequestsAndResponses(true)
                 .build();

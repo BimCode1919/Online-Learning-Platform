@@ -19,12 +19,18 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/instructor")
@@ -109,10 +115,32 @@ public class InstructorController {
                             @RequestParam(value = "lessonId", required = false) Long lessonId,
                             @RequestParam("title") String title,
                             @RequestParam("content") String content,
-                            @RequestParam("videoUrl") String videoUrl,
+                            @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
+                            @RequestParam(value = "existingVideoUrl", required = false) String existingVideoUrl,
                             RedirectAttributes redirectAttributes) {
         try {
-            courseService.addOrUpdateLesson(courseId, lessonId, title, content, videoUrl);
+            String finalVideoUrl = existingVideoUrl;
+
+            if (videoFile != null && !videoFile.isEmpty()) {
+                Path uploadDir = Paths.get("uploads", "videos");
+                if (!Files.exists(uploadDir)) {
+                    Files.createDirectories(uploadDir);
+                }
+
+                String originalFilename = videoFile.getOriginalFilename();
+                String extension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+                }
+
+                String newFileName = UUID.randomUUID() + extension;
+                Path targetPath = uploadDir.resolve(newFileName);
+                Files.copy(videoFile.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+                finalVideoUrl = "/uploads/videos/" + newFileName;
+            }
+
+            courseService.addOrUpdateLesson(courseId, lessonId, title, content, finalVideoUrl);
             String msg = (lessonId != null) ? "Cập nhật bài học thành công!" : "Thêm bài học mới thành công!";
             redirectAttributes.addFlashAttribute("success", msg);
         } catch (Exception e) {

@@ -123,8 +123,9 @@
                     <span class="w-6 h-6 bg-indigo-100 rounded-full text-indigo-600 inline-flex items-center justify-center text-xs mr-2">+</span>
                     Thêm bài học mới
                 </h3>
-                <form th:action="@{/instructor/course/{id}/add-lesson(id=${course.id})}" method="post" class="space-y-4">
+                <form th:action="@{/instructor/course/{id}/add-lesson(id=${course.id})}" method="post" enctype="multipart/form-data" class="space-y-4">
                     <input type="hidden" name="lessonId" id="lessonIdInput">
+                    <input type="hidden" name="existingVideoUrl" id="existingVideoUrlInput">
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2">
@@ -132,8 +133,9 @@
                             <input type="text" name="title" id="lessonTitleInput" required class="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500"/>
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Video URL (YouTube)</label>
-                            <input type="text" name="videoUrl" id="lessonVideoInput" placeholder="https://youtube.com/..." class="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500"/>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Video bài giảng (Upload file)</label>
+                            <input type="file" name="videoFile" id="lessonVideoInput" accept="video/mp4, video/webm" class="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 bg-white"/>
+                            <div id="currentVideoInfo" class="hidden mt-2 text-[11px] text-slate-500 font-medium"></div>
                         </div>
                     </div>
 
@@ -336,8 +338,13 @@
         // Hàm reset form bài học
         function resetLessonForm() {
             document.getElementById('lessonIdInput').value = "";
+            document.getElementById('existingVideoUrlInput').value = "";
             const form = document.getElementById('lessonIdInput').closest('form');
             form.reset();
+
+            const currentVideoInfo = document.getElementById('currentVideoInfo');
+            currentVideoInfo.innerText = "";
+            currentVideoInfo.classList.add('hidden');
 
             document.getElementById('submitBtn').innerText = "+ Xuất bản bài học";
             document.getElementById('submitBtn').classList.remove('bg-indigo-600');
@@ -360,16 +367,17 @@
                     document.getElementById('lessonIdInput').value = id;
                     document.getElementById('lessonTitleInput').value = title;
                     document.getElementById('lessonContentInput').value = content;
+                    document.getElementById('existingVideoUrlInput').value = (video && video !== 'null') ? video : '';
 
-                    // Xử lý video URL
+                    // Hiển thị thông tin video hiện tại khi chỉnh sửa
+                    const currentVideoInfo = document.getElementById('currentVideoInfo');
                     if (video && video !== 'null') {
-                        if (video.startsWith('http')) {
-                            document.getElementById('lessonVideoInput').value = video;
-                        } else {
-                            document.getElementById('lessonVideoInput').value = "https://www.youtube.com/watch?v=" + video;
-                        }
+                        const videoFileName = video.split('/').pop();
+                        currentVideoInfo.innerText = 'Video hiện tại: ' + videoFileName;
+                        currentVideoInfo.classList.remove('hidden');
                     } else {
-                        document.getElementById('lessonVideoInput').value = "";
+                        currentVideoInfo.innerText = '';
+                        currentVideoInfo.classList.add('hidden');
                     }
 
                     // Đổi trạng thái nút

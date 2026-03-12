@@ -12,7 +12,8 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        .video-container iframe {
+        .video-container iframe,
+        .video-container video {
             border-radius: 1.5rem;
             box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
@@ -54,6 +55,12 @@
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
                 </iframe>
+                <video id="mainVideoLocalPlayer"
+                       class="w-full h-full hidden"
+                       controls
+                       playsinline
+                       preload="metadata">
+                </video>
                 <div id="placeholder" class="text-center p-8">
                     <div class="text-6xl mb-4">🎬</div>
                     <p class="text-slate-400 font-bold uppercase tracking-tighter text-sm">Chọn một bài giảng để kiểm
@@ -130,13 +137,59 @@
 </div>
 
 <script>
+    function isLocalVideoUrl(videoSource) {
+        if (!videoSource) return false;
+        const value = videoSource.trim().toLowerCase();
+        return value.startsWith('/uploads/') || value.startsWith('uploads/') || value.endsWith('.mp4') || value.endsWith('.webm');
+    }
+
+    function resolveLocalVideoUrl(videoSource) {
+        const value = videoSource.trim().replace(/\\/g, '/');
+        const lower = value.toLowerCase();
+
+        if (lower.startsWith('http://') || lower.startsWith('https://') || value.startsWith('/')) {
+            return value;
+        }
+
+        if (value.startsWith('uploads/')) {
+            return '/' + value;
+        }
+
+        return '/uploads/videos/' + value;
+    }
+
+    function extractYoutubeId(videoSource) {
+        if (!videoSource) return null;
+        const value = videoSource.trim();
+
+        if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
+            return value;
+        }
+
+        const patterns = [
+            /[?&]v=([^&#]{11})/,
+            /youtu\.be\/([^?&#]{11})/,
+            /youtube\.com\/embed\/([^?&#]{11})/,
+            /youtube\.com\/shorts\/([^?&#]{11})/
+        ];
+
+        for (const pattern of patterns) {
+            const match = value.match(pattern);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+
+        return null;
+    }
+
     function playLesson(element) {
-        // Lấy mã ID từ data-url (Ví dụ: LSEYdU8Dp9Y)
-        const videoId = element.getAttribute('data-url');
-        const player = document.getElementById('mainVideoPlayer');
+        const videoSource = element.getAttribute('data-url');
+        const youtubePlayer = document.getElementById('mainVideoPlayer');
+        const localPlayer = document.getElementById('mainVideoLocalPlayer');
         const placeholder = document.getElementById('placeholder');
 
-        if (!videoId || videoId.trim() === "") {
+        if (!videoSource || videoSource.trim() === "") {
             alert("Bài giảng này chưa có mã video!");
             return;
         }
@@ -145,12 +198,31 @@
         document.querySelectorAll('.lesson-card').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
 
-        // 2. Tạo link nhúng từ ID và gán vào iframe
-        // Chúng ta dùng mã videoId trực tiếp vì bạn đã lưu đúng định dạng ID
-        player.src = "https://www.youtube.com/embed/" + videoId.trim() + "?autoplay=1&rel=0&modestbranding=1";
+        if (isLocalVideoUrl(videoSource)) {
+            youtubePlayer.src = "";
+            youtubePlayer.classList.add('hidden');
+
+            localPlayer.src = resolveLocalVideoUrl(videoSource);
+            localPlayer.classList.remove('hidden');
+            localPlayer.load();
+            localPlayer.play().catch(() => {});
+        } else {
+            const embedId = extractYoutubeId(videoSource);
+            if (!embedId) {
+                alert("Không đọc được định dạng video hiện tại!");
+                return;
+            }
+
+            localPlayer.pause();
+            localPlayer.removeAttribute('src');
+            localPlayer.load();
+            localPlayer.classList.add('hidden');
+
+            youtubePlayer.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0&modestbranding=1";
+            youtubePlayer.classList.remove('hidden');
+        }
 
         // 3. Hiển thị trình phát và ẩn thông báo chờ
-        player.classList.remove('hidden');
         placeholder.classList.add('hidden');
 
         // Cuộn màn hình lên đầu nếu đang xem trên điện thoại
@@ -170,7 +242,7 @@
         background: #f1f5f9;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-地域の {
+    .custom-scrollbar::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 10px;
     }

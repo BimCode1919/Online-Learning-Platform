@@ -9,6 +9,38 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .quiz-card { background: linear-gradient(145deg, #2d3748, #1e293b); border: 1px solid #4a5568; }
+        .player-shell {
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), rgba(15, 23, 42, 0.95) 45%), #0b1220;
+        }
+        .player-media {
+            border-radius: 1rem;
+        }
+        #video-progress {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 9999px;
+            background: #334155;
+            outline: none;
+        }
+        #video-progress::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            border: 2px solid #c7d2fe;
+        }
+        #video-progress::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            border: 2px solid #c7d2fe;
+        }
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 overflow-hidden">
@@ -71,21 +103,53 @@
     <!-- Khu vực chính bên phải -->
     <div class="flex-1 flex flex-col h-full overflow-hidden">
         <!-- Video player -->
-        <div class="flex-1 bg-black relative flex items-center justify-center">
-            <iframe id="youtube-player"
-                    class="w-full h-full hidden"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-            </iframe>
-
-            <div id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-center bg-slate-900">
-                <div class="max-w-sm px-6">
-                    <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/50 animate-bounce">
-                        <span class="text-3xl text-white">▶</span>
+        <div class="flex-1 bg-[#0b1220] p-4 md:p-6 border-b border-slate-800">
+            <div class="player-shell h-full rounded-3xl border border-slate-700/70 shadow-2xl shadow-black/40 overflow-hidden flex flex-col">
+                <div class="px-5 py-3 border-b border-slate-700/70 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] text-slate-400 uppercase tracking-widest font-black">Khung phát bài học</p>
+                        <p class="text-sm text-slate-300 font-semibold">Hỗ trợ video upload và YouTube</p>
                     </div>
-                    <h2 class="text-xl font-bold text-white">Sẵn sàng học tập?</h2>
-                    <p class="text-slate-500 mt-2">Hãy chọn một bài học từ danh sách bên trái để bắt đầu bài giảng ngay nhé!</p>
+                    <span id="video-type-badge" class="text-[10px] font-black px-3 py-1 rounded-full bg-slate-700 text-slate-300">Chưa chọn bài</span>
+                </div>
+
+                <div id="player-stage" class="relative flex-1 min-h-0 bg-black/40">
+                    <iframe id="youtube-player"
+                            class="player-media absolute inset-0 w-full h-full hidden"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                    </iframe>
+                    <video id="local-video-player"
+                           class="player-media absolute inset-0 w-full h-full hidden"
+                           playsinline
+                           preload="metadata">
+                    </video>
+
+                    <div id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-center bg-slate-900/90">
+                        <div class="max-w-sm px-6">
+                            <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/50 animate-bounce">
+                                <span class="text-3xl text-white">▶</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">Sẵn sàng học tập?</h2>
+                            <p class="text-slate-400 mt-2">Hãy chọn một bài học từ danh sách bên trái để bắt đầu bài giảng ngay nhé!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="local-video-controls" class="hidden px-4 md:px-5 py-3 border-t border-slate-700/70 bg-slate-900/80">
+                    <div class="flex items-center gap-3">
+                        <button id="btn-play-pause" type="button" class="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition">
+                            ▶
+                        </button>
+                        <input id="video-progress" type="range" min="0" max="100" value="0" step="0.1" class="flex-1">
+                        <span id="video-current-time" class="text-xs font-bold text-slate-200 min-w-10 text-right">00:00</span>
+                        <span class="text-slate-500 text-xs">/</span>
+                        <span id="video-duration" class="text-xs font-bold text-slate-400 min-w-10">00:00</span>
+                        <button id="btn-video-fullscreen" type="button" class="px-3 py-1.5 text-[11px] font-black rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
+                            Toàn màn hình
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -147,13 +211,117 @@
     let currentLessonId = null;
     let currentQuizId = null;
     let currentQuizCompleted = false;
+    let isSeeking = false;
     const enrollmentId = [[${enrollment.id}]];
     const quizAttempts = /*[[${quizAttempts}]]*/ [];
     const completedQuizzes = /*[[${completedQuizzes}]]*/ [];
 
+    function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+
+        const totalSeconds = Math.floor(seconds);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+
+        if (hours > 0) {
+            return String(hours) + ':' + String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+
+        return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    function setVideoTypeBadge(text, theme) {
+        const badge = document.getElementById('video-type-badge');
+        if (!badge) return;
+
+        badge.innerText = text;
+        badge.classList.remove('bg-slate-700', 'text-slate-300', 'bg-indigo-600', 'text-white', 'bg-red-600');
+
+        if (theme === 'local') {
+            badge.classList.add('bg-indigo-600', 'text-white');
+        } else if (theme === 'error') {
+            badge.classList.add('bg-red-600', 'text-white');
+        } else {
+            badge.classList.add('bg-slate-700', 'text-slate-300');
+        }
+    }
+
+    function resetLocalPlayerUi() {
+        const progress = document.getElementById('video-progress');
+        const currentTime = document.getElementById('video-current-time');
+        const duration = document.getElementById('video-duration');
+        const playBtn = document.getElementById('btn-play-pause');
+
+        progress.value = 0;
+        currentTime.innerText = '00:00';
+        duration.innerText = '00:00';
+        playBtn.innerText = '▶';
+        isSeeking = false;
+    }
+
+    function syncLocalPlayerUi() {
+        const player = document.getElementById('local-video-player');
+        const progress = document.getElementById('video-progress');
+        const currentTime = document.getElementById('video-current-time');
+        const duration = document.getElementById('video-duration');
+        const playBtn = document.getElementById('btn-play-pause');
+
+        const total = Number.isFinite(player.duration) ? player.duration : 0;
+        const current = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+
+        if (!isSeeking && total > 0) {
+            progress.value = (current / total) * 100;
+        }
+
+        currentTime.innerText = formatTime(current);
+        duration.innerText = formatTime(total);
+        playBtn.innerText = player.paused ? '▶' : '❚❚';
+    }
+
+    function bindLocalVideoControls() {
+        const player = document.getElementById('local-video-player');
+        const progress = document.getElementById('video-progress');
+        const playBtn = document.getElementById('btn-play-pause');
+        const fullscreenBtn = document.getElementById('btn-video-fullscreen');
+        const stage = document.getElementById('player-stage');
+
+        playBtn.addEventListener('click', function () {
+            if (player.paused) {
+                player.play().catch(() => {});
+            } else {
+                player.pause();
+            }
+        });
+
+        progress.addEventListener('input', function () {
+            isSeeking = true;
+            if (Number.isFinite(player.duration) && player.duration > 0) {
+                player.currentTime = (Number(progress.value) / 100) * player.duration;
+            }
+            syncLocalPlayerUi();
+        });
+
+        progress.addEventListener('change', function () {
+            isSeeking = false;
+        });
+
+        fullscreenBtn.addEventListener('click', function () {
+            if (stage.requestFullscreen) {
+                stage.requestFullscreen();
+            }
+        });
+
+        player.addEventListener('loadedmetadata', syncLocalPlayerUi);
+        player.addEventListener('timeupdate', syncLocalPlayerUi);
+        player.addEventListener('play', syncLocalPlayerUi);
+        player.addEventListener('pause', syncLocalPlayerUi);
+        player.addEventListener('ended', syncLocalPlayerUi);
+    }
+
     function handleLessonClick(element) {
         currentLessonId = element.getAttribute('data-id');
-        const videoId = element.getAttribute('data-video');
+        const videoSource = element.getAttribute('data-video');
         const title = element.getAttribute('data-title');
         const content = element.getAttribute('data-content') || 'Bài học này chưa có nội dung chi tiết.';
         currentQuizId = element.getAttribute('data-quiz-id');
@@ -170,7 +338,7 @@
         document.getElementById('current-lesson-title').innerText = title;
 
         // Handle video
-        playVideo(videoId);
+        playVideo(videoSource);
 
         // Update quiz button
         updateQuizButton();
@@ -179,26 +347,114 @@
         updateQuizResult();
     }
 
-    function playVideo(videoId) {
-        const player = document.getElementById('youtube-player');
+    function isLocalVideoUrl(videoSource) {
+        if (!videoSource) return false;
+        const value = videoSource.trim().toLowerCase();
+        return value.startsWith('/uploads/') || value.startsWith('uploads/') || value.endsWith('.mp4') || value.endsWith('.webm');
+    }
+
+    function resolveLocalVideoUrl(videoSource) {
+        const value = videoSource.trim().replace(/\\/g, '/');
+        const lower = value.toLowerCase();
+
+        if (lower.startsWith('http://') || lower.startsWith('https://') || value.startsWith('/')) {
+            return value;
+        }
+
+        if (value.startsWith('uploads/')) {
+            return '/' + value;
+        }
+
+        return '/uploads/videos/' + value;
+    }
+
+    function extractYoutubeId(videoSource) {
+        if (!videoSource) return null;
+        const value = videoSource.trim();
+
+        if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
+            return value;
+        }
+
+        const patterns = [
+            /[?&]v=([^&#]{11})/,
+            /youtu\.be\/([^?&#]{11})/,
+            /youtube\.com\/embed\/([^?&#]{11})/,
+            /youtube\.com\/shorts\/([^?&#]{11})/
+        ];
+
+        for (const pattern of patterns) {
+            const match = value.match(pattern);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+
+        return null;
+    }
+
+    function playVideo(videoSource) {
+        const youtubePlayer = document.getElementById('youtube-player');
+        const localPlayer = document.getElementById('local-video-player');
+        const localControls = document.getElementById('local-video-controls');
         const placeholder = document.getElementById('video-placeholder');
         const btnComplete = document.getElementById('btn-complete');
 
-        if (videoId && videoId !== 'null' && videoId !== '') {
-            let embedId = videoId;
-            if (videoId.includes('v=')) {
-                embedId = videoId.split('v=')[1]?.substring(0, 11);
-            } else if (videoId.includes('youtu.be/')) {
-                embedId = videoId.split('youtu.be/')[1]?.substring(0, 11);
+        if (videoSource && videoSource !== 'null' && videoSource !== '') {
+            if (isLocalVideoUrl(videoSource)) {
+                youtubePlayer.src = '';
+                youtubePlayer.classList.add('hidden');
+
+                localPlayer.src = resolveLocalVideoUrl(videoSource);
+                localPlayer.classList.remove('hidden');
+                localControls.classList.remove('hidden');
+                localPlayer.load();
+                localPlayer.play().catch(() => {});
+                setVideoTypeBadge('Video upload', 'local');
+                syncLocalPlayerUi();
+            } else {
+                const embedId = extractYoutubeId(videoSource);
+                if (!embedId) {
+                    youtubePlayer.src = '';
+                    youtubePlayer.classList.add('hidden');
+                    localPlayer.pause();
+                    localPlayer.removeAttribute('src');
+                    localPlayer.load();
+                    localPlayer.classList.add('hidden');
+                    localControls.classList.add('hidden');
+                    resetLocalPlayerUi();
+                    placeholder.classList.remove('hidden');
+                    btnComplete.classList.add('hidden');
+                    setVideoTypeBadge('Video không hợp lệ', 'error');
+                    return;
+                }
+
+                localPlayer.pause();
+                localPlayer.removeAttribute('src');
+                localPlayer.load();
+                localPlayer.classList.add('hidden');
+                localControls.classList.add('hidden');
+                resetLocalPlayerUi();
+
+                youtubePlayer.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0";
+                youtubePlayer.classList.remove('hidden');
+                setVideoTypeBadge('YouTube', 'default');
             }
-            player.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0";
-            player.classList.remove('hidden');
+
             placeholder.classList.add('hidden');
             btnComplete.classList.remove('hidden');
         } else {
-            player.classList.add('hidden');
+            youtubePlayer.src = '';
+            youtubePlayer.classList.add('hidden');
+            localPlayer.pause();
+            localPlayer.removeAttribute('src');
+            localPlayer.load();
+            localPlayer.classList.add('hidden');
+            localControls.classList.add('hidden');
+            resetLocalPlayerUi();
             placeholder.classList.remove('hidden');
             btnComplete.classList.add('hidden');
+            setVideoTypeBadge('Chưa chọn bài', 'default');
         }
     }
 
@@ -254,9 +510,12 @@
 
     // Auto-select first lesson
     document.addEventListener('DOMContentLoaded', function() {
+        bindLocalVideoControls();
         const firstLesson = document.querySelector('.lesson-item');
         if (firstLesson) {
             firstLesson.click();
+        } else {
+            setVideoTypeBadge('Chưa chọn bài', 'default');
         }
     });
 </script>

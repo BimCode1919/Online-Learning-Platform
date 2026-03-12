@@ -153,17 +153,54 @@ public class CourseServiceImpl implements CourseService {
         if (url == null || url.trim().isEmpty()) {
             return null;
         }
+
+        String normalizedUrl = url.trim();
+        if (isLocalVideoReference(normalizedUrl)) {
+            return normalizeLocalVideoPath(normalizedUrl);
+        }
+
         // Regex mạnh mẽ để tách ID từ nhiều định dạng link YouTube (shorter, watch, embed, v.v.)
-        String pattern = "(?<=watch\\?v=|/videos/|/embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*";
+        String pattern = "(?<=watch\\?v=|/embed/|youtu\\.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|embed%2F|youtu\\.be%2F|%2Fv%2F)[^#&?\\n]*";
         Pattern compiledPattern = Pattern.compile(pattern);
-        Matcher matcher = compiledPattern.matcher(url);
+        Matcher matcher = compiledPattern.matcher(normalizedUrl);
 
         if (matcher.find()) {
             return matcher.group();
         }
 
         // Nếu link đã là ID rồi (ví dụ: dQw4w9WgXcQ) thì trả về chính nó
-        return url;
+        return normalizedUrl;
+    }
+
+    private boolean isLocalVideoReference(String value) {
+        String lower = value.toLowerCase();
+        return lower.startsWith("/uploads/")
+                || lower.startsWith("uploads/")
+                || lower.endsWith(".mp4")
+                || lower.endsWith(".webm");
+    }
+
+    private String normalizeLocalVideoPath(String value) {
+        String cleaned = value.replace("\\", "/").trim();
+        String lower = cleaned.toLowerCase();
+
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
+            return cleaned;
+        }
+
+        if (cleaned.startsWith("/uploads/")) {
+            return cleaned;
+        }
+
+        if (cleaned.startsWith("uploads/")) {
+            return "/" + cleaned;
+        }
+
+        if (!cleaned.contains("/") && (lower.endsWith(".mp4") || lower.endsWith(".webm"))) {
+            return "/uploads/videos/" + cleaned;
+        }
+
+        return cleaned;
     }
 
     @Override

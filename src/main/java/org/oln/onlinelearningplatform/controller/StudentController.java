@@ -35,6 +35,7 @@ public class StudentController {
     private final QuizRepository quizRepository;
     private final QuizAttemptService quizAttemptService;
     private final QuizAttemptRepository quizAttemptRepository;
+    private final org.oln.onlinelearningplatform.repository.UserProgressRepository userProgressRepository;
 
     public StudentController(CourseService courseService,
                              UserService userService,
@@ -43,7 +44,8 @@ public class StudentController {
                              EnrollmentRepository enrollmentRepository,
                              QuizRepository quizRepository,
                              QuizAttemptService quizAttemptService,
-                             QuizAttemptRepository quizAttemptRepository) {
+                             QuizAttemptRepository quizAttemptRepository,
+                             org.oln.onlinelearningplatform.repository.UserProgressRepository userProgressRepository) {
         this.courseService = courseService;
         this.userService = userService;
         this.enrollmentService = enrollmentService;
@@ -52,6 +54,7 @@ public class StudentController {
         this.quizRepository = quizRepository;
         this.quizAttemptService = quizAttemptService;
         this.quizAttemptRepository = quizAttemptRepository;
+        this.userProgressRepository = userProgressRepository;
     }
 
     // ============= DASHBOARD =============
@@ -190,12 +193,16 @@ public class StudentController {
         // Lấy danh sách quiz đã hoàn thành
         Set<Long> completedQuizzes = quizAttemptService.findCompletedQuizIdsByUserAndCourse(user.getId(), courseId);
 
+        // Lấy danh sách ID các bài học đã hoàn thành
+        Set<Long> completedLessons = userProgressRepository.findCompletedLessonIdsByUserAndCourse(user.getId(), courseId);
+
         // Lấy tất cả kết quả quiz của user trong khóa học này
         List<QuizAttempt> quizAttempts = quizAttemptService.findByUserAndCourse(user.getId(), courseId);
 
         model.addAttribute("course", course);
         model.addAttribute("enrollment", enrollment);
         model.addAttribute("completedQuizzes", completedQuizzes);
+        model.addAttribute("completedLessons", completedLessons);
         model.addAttribute("quizAttempts", quizAttempts);
 
         return "views/student/learning-dashboard";
@@ -328,6 +335,14 @@ public class StudentController {
         attempt.setCreatedAt(LocalDateTime.now());
 
         quizAttemptRepository.save(attempt);
+
+        // Automatically mark the lesson as completed when the quiz is submitted
+        if (quiz.getLesson() != null && quiz.getLesson().getCourse() != null) {
+            Enrollment enrollment = enrollmentService.findByUserAndCourse(user.getId(), quiz.getLesson().getCourse().getId());
+            if (enrollment != null) {
+                enrollmentService.updateProgress(enrollment, quiz.getLesson().getId());
+            }
+        }
 
         redirectAttributes.addFlashAttribute("success", "Hoàn thành quiz! Điểm: " + Math.round(score) + "%");
         return "redirect:/student/quiz/result/" + attempt.getId();

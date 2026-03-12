@@ -15,4 +15,10 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
     @Query("SELECT up FROM UserProgress up WHERE up.user.id = :userId AND up.lesson.id = :lessonId")
     Optional<UserProgress> findByUserIdAndLessonId(@Param("userId") Long userId,
                                                    @Param("lessonId") Long lessonId);
+
+    @Query("SELECT up.lesson.id FROM UserProgress up WHERE up.user.id = :userId AND up.lesson.course.id = :courseId AND up.isCompleted = true")
+    java.util.Set<Long> findCompletedLessonIdsByUserAndCourse(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    @Query("SELECT COUNT(up) FROM UserProgress up WHERE up.user.id = :userId AND up.lesson.course.id = :courseId AND up.isCompleted = true")
+    long countCompletedLessonsByUserAndCourse(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

@@ -72,12 +72,15 @@
                     data-title=${lesson.title},
                     data-content=${lesson.content},
                     data-quiz-id=${lesson.quiz != null ? lesson.quiz.id : ''},
-                    data-quiz-completed=${completedQuizzes != null and lesson.quiz != null ? completedQuizzes.contains(lesson.quiz.id) : false}"
+                    data-quiz-completed=${completedQuizzes != null and lesson.quiz != null ? completedQuizzes.contains(lesson.quiz.id) : false},
+                    data-lesson-completed=${completedLessons != null ? completedLessons.contains(lesson.id) : false}"
                  onclick="handleLessonClick(this)">
 
                 <div class="flex items-start gap-3">
-                    <div class="bg-slate-800 text-slate-500 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold group-hover:bg-indigo-500 group-hover:text-white transition-colors" th:text="${i.count}">
-                        1
+                    <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold transition-colors"
+                         th:classappend="${completedLessons != null and completedLessons.contains(lesson.id)} ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500 group-hover:text-white'">
+                        <span th:if="${completedLessons != null and completedLessons.contains(lesson.id)}">✔</span>
+                        <span th:unless="${completedLessons != null and completedLessons.contains(lesson.id)}" th:text="${i.count}">1</span>
                     </div>
                     <div class="flex-1">
                         <span class="text-[10px] font-black text-slate-500 block mb-1 uppercase tracking-wider">Bài học</span>
@@ -213,8 +216,8 @@
     let currentQuizCompleted = false;
     let isSeeking = false;
     const enrollmentId = [[${enrollment.id}]];
-    const quizAttempts = /*[[${quizAttempts}]]*/ [];
-    const completedQuizzes = /*[[${completedQuizzes}]]*/ [];
+    const quizAttempts = [[${quizAttempts}]];
+    const completedQuizzes = [[${completedQuizzes}]];
 
     function formatTime(seconds) {
         if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
@@ -319,6 +322,8 @@
         player.addEventListener('ended', syncLocalPlayerUi);
     }
 
+    let currentLessonCompleted = false;
+
     function handleLessonClick(element) {
         currentLessonId = element.getAttribute('data-id');
         const videoSource = element.getAttribute('data-video');
@@ -326,6 +331,7 @@
         const content = element.getAttribute('data-content') || 'Bài học này chưa có nội dung chi tiết.';
         currentQuizId = element.getAttribute('data-quiz-id');
         currentQuizCompleted = element.getAttribute('data-quiz-completed') === 'true';
+        currentLessonCompleted = element.getAttribute('data-lesson-completed') === 'true';
 
         // Update active state
         document.querySelectorAll('.lesson-item').forEach(item => {
@@ -340,13 +346,14 @@
         // Handle video
         playVideo(videoSource);
 
-        // Update quiz button
-        updateQuizButton();
+        // Update quiz and complete buttons
+        updateActionButtons();
 
         // Update quiz result
         updateQuizResult();
     }
 
+    // ... (Keep intermediate functions unchanged)
     function isLocalVideoUrl(videoSource) {
         if (!videoSource) return false;
         const value = videoSource.trim().toLowerCase();
@@ -394,12 +401,12 @@
     }
 
     function playVideo(videoSource) {
+        // ... (existing code for this remains unchanged)
         const youtubePlayer = document.getElementById('youtube-player');
         const localPlayer = document.getElementById('local-video-player');
         const localControls = document.getElementById('local-video-controls');
         const placeholder = document.getElementById('video-placeholder');
-        const btnComplete = document.getElementById('btn-complete');
-
+        
         if (videoSource && videoSource !== 'null' && videoSource !== '') {
             if (isLocalVideoUrl(videoSource)) {
                 youtubePlayer.src = '';
@@ -424,7 +431,6 @@
                     localControls.classList.add('hidden');
                     resetLocalPlayerUi();
                     placeholder.classList.remove('hidden');
-                    btnComplete.classList.add('hidden');
                     setVideoTypeBadge('Video không hợp lệ', 'error');
                     return;
                 }
@@ -442,7 +448,6 @@
             }
 
             placeholder.classList.add('hidden');
-            btnComplete.classList.remove('hidden');
         } else {
             youtubePlayer.src = '';
             youtubePlayer.classList.add('hidden');
@@ -453,14 +458,19 @@
             localControls.classList.add('hidden');
             resetLocalPlayerUi();
             placeholder.classList.remove('hidden');
-            btnComplete.classList.add('hidden');
             setVideoTypeBadge('Chưa chọn bài', 'default');
         }
     }
 
-    function updateQuizButton() {
+    function updateActionButtons() {
         const btnQuiz = document.getElementById('btn-quiz');
+        const btnComplete = document.getElementById('btn-complete');
+        
+        btnQuiz.classList.add('hidden');
+        btnComplete.classList.add('hidden');
+
         if (currentQuizId && currentQuizId !== '' && currentQuizId !== 'null') {
+            // Lesson has a quiz
             btnQuiz.classList.remove('hidden');
             if (currentQuizCompleted) {
                 btnQuiz.innerHTML = '<span>📋</span> Xem lại quiz';
@@ -473,7 +483,21 @@
             }
             btnQuiz.href = '/student/quiz/' + currentQuizId + '/take';
         } else {
-            btnQuiz.classList.add('hidden');
+            // No quiz, show complete button
+            if (currentLessonId) {
+                btnComplete.classList.remove('hidden');
+                if (currentLessonCompleted) {
+                    btnComplete.innerHTML = '✔ Đã hoàn thành';
+                    btnComplete.classList.remove('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
+                    btnComplete.classList.add('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
+                    btnComplete.disabled = true;
+                } else {
+                    btnComplete.innerHTML = '✔ Hoàn thành bài học';
+                    btnComplete.classList.remove('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
+                    btnComplete.classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
+                    btnComplete.disabled = false;
+                }
+            }
         }
     }
 

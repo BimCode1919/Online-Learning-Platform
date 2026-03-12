@@ -150,8 +150,8 @@ public class InstructorController {
     }
 
     @PostMapping("/course/{courseId}/delete-lesson/{lessonId}")
-    public String deleteLesson(@PathVariable Long courseId,
-                               @PathVariable Long lessonId,
+    public String deleteLesson(@PathVariable("courseId") Long courseId,
+                               @PathVariable("lessonId") Long lessonId,
                                RedirectAttributes redirectAttributes) {
         try {
             courseService.deleteLesson(lessonId);
@@ -175,8 +175,8 @@ public class InstructorController {
 
     // Tạo quiz cho lesson
     @PostMapping("/lesson/{lessonId}/create-quiz")
-    public String createQuiz(@PathVariable Long lessonId,
-                             @RequestParam String difficulty,
+    public String createQuiz(@PathVariable("lessonId") Long lessonId,
+                             @RequestParam("difficulty") String difficulty,
                              RedirectAttributes redirectAttributes) {
         try {
             Quiz quiz = quizService.createQuizForLesson(lessonId, difficulty);
@@ -192,7 +192,7 @@ public class InstructorController {
 
     // Hiển thị trang chỉnh sửa quiz
     @GetMapping("/quiz/{quizId}/edit")
-    public String editQuiz(@PathVariable Long quizId, Model model, RedirectAttributes redirectAttributes) {
+    public String editQuiz(@PathVariable("quizId") Long quizId, Model model, RedirectAttributes redirectAttributes) {
         System.out.println("=== EDIT QUIZ METHOD CALLED ===");
         System.out.println("Quiz ID: " + quizId);
 
@@ -228,11 +228,11 @@ public class InstructorController {
 
     // Thêm câu hỏi vào quiz
     @PostMapping("/quiz/{quizId}/add-question")
-    public String addQuestion(@PathVariable Long quizId,
-                              @RequestParam String questionText,
-                              @RequestParam(required = false) String explanation,
-                              @RequestParam List<String> optionText,
-                              @RequestParam Integer correctIndex,
+    public String addQuestion(@PathVariable("quizId") Long quizId,
+                              @RequestParam("questionText") String questionText,
+                              @RequestParam(value = "explanation", required = false) String explanation,
+                              @RequestParam("optionText") List<String> optionText,
+                              @RequestParam("correctIndex") Integer correctIndex,
                               RedirectAttributes redirectAttributes) {
         try {
             List<OptionRequestDTO> optionDTOs = new ArrayList<>();
@@ -255,7 +255,7 @@ public class InstructorController {
 
     // Xóa câu hỏi
     @PostMapping("/question/{questionId}/delete")
-    public String deleteQuestion(@PathVariable Long questionId,
+    public String deleteQuestion(@PathVariable("questionId") Long questionId,
                                  RedirectAttributes redirectAttributes) {
         try {
             Long quizId = questionService.deleteQuestion(questionId);
@@ -269,7 +269,7 @@ public class InstructorController {
 
     // Xóa quiz
     @PostMapping("/quiz/{quizId}/delete")
-    public String deleteQuiz(@PathVariable Long quizId,
+    public String deleteQuiz(@PathVariable("quizId") Long quizId,
                              RedirectAttributes redirectAttributes) {
         try {
             Quiz quiz = quizRepository.findById(quizId)

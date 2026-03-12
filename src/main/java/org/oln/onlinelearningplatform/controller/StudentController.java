@@ -86,7 +86,7 @@ public class StudentController {
 
     // ============= CHI TIẾT KHÓA HỌC =============
     @GetMapping("/course/detail/{id}")
-    public String viewCourseDetail(@PathVariable Long id,
+    public String viewCourseDetail(@PathVariable("id") Long id,
                                    @AuthenticationPrincipal UserDetails userDetails,
                                    Model model) {
         String email = userDetails.getUsername();
@@ -106,7 +106,7 @@ public class StudentController {
 
     // ============= ĐĂNG KÝ KHÓA HỌC =============
     @PostMapping("/course/enroll/{id}")
-    public String handleEnrollment(@PathVariable Long id,
+    public String handleEnrollment(@PathVariable("id") Long id,
                                    @AuthenticationPrincipal UserDetails userDetails,
                                    HttpServletRequest request) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -177,7 +177,7 @@ public class StudentController {
 
 //     ============= TRANG HỌC TẬP =============
     @GetMapping("/learning/{courseId}")
-    public String startLearning(@PathVariable Long courseId,
+    public String startLearning(@PathVariable("courseId") Long courseId,
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 Model model) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -214,7 +214,7 @@ public class StudentController {
      * Trang làm quiz
      */
     @GetMapping("/quiz/{quizId}/take")
-    public String takeQuiz(@PathVariable Long quizId,
+    public String takeQuiz(@PathVariable("quizId") Long quizId,
                            @AuthenticationPrincipal UserDetails userDetails,
                            Model model,
                            RedirectAttributes redirectAttributes) {
@@ -270,7 +270,7 @@ public class StudentController {
      * Xử lý nộp bài quiz
      */
     @PostMapping("/quiz/{quizId}/submit")
-    public String submitQuiz(@PathVariable Long quizId,
+    public String submitQuiz(@PathVariable("quizId") Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam(value = "selectedOptions") List<Long> selectedOptions,
                              RedirectAttributes redirectAttributes) {
@@ -352,7 +352,7 @@ public class StudentController {
      * Xem kết quả quiz
      */
     @GetMapping("/quiz/result/{attemptId}")
-    public String viewQuizResult(@PathVariable Long attemptId,
+    public String viewQuizResult(@PathVariable("attemptId") Long attemptId,
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  Model model) {
 
@@ -375,7 +375,7 @@ public class StudentController {
      * Xem lại chi tiết bài làm (câu nào đúng/sai)
      */
     @GetMapping("/quiz/review/{attemptId}")
-    public String reviewQuiz(@PathVariable Long attemptId,
+    public String reviewQuiz(@PathVariable("attemptId") Long attemptId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              Model model) {
 
@@ -412,8 +412,8 @@ public class StudentController {
      */
     @PostMapping("/api/lesson/{lessonId}/complete")
     @ResponseBody
-    public String completeLesson(@PathVariable Long lessonId,
-                                 @RequestParam Long enrollmentId,
+    public String completeLesson(@PathVariable("lessonId") Long lessonId,
+                                 @RequestParam("enrollmentId") Long enrollmentId,
                                  @AuthenticationPrincipal UserDetails userDetails) {
 
         User user = userService.findByEmail(userDetails.getUsername()); // Đổi tên biến
@@ -446,7 +446,7 @@ public class StudentController {
     }
 
     @PostMapping("/quiz/{quizId}/retake")
-    public String retakeQuiz(@PathVariable Long quizId,
+    public String retakeQuiz(@PathVariable("quizId") Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              RedirectAttributes redirectAttributes) {
 

@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Học tập: [[${course.title}]]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .quiz-card { background: linear-gradient(145deg, #2d3748, #1e293b); border: 1px solid #4a5568; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .quiz-card {
+            background: linear-gradient(145deg, #2d3748, #1e293b);
+            border: 1px solid #4a5568;
+        }
+
         .player-shell {
             background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), rgba(15, 23, 42, 0.95) 45%), #0b1220;
         }
+
         .player-media {
             border-radius: 1rem;
         }
+
         #video-progress {
             -webkit-appearance: none;
             appearance: none;
@@ -23,6 +40,7 @@
             background: #334155;
             outline: none;
         }
+
         #video-progress::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -33,6 +51,7 @@
             cursor: pointer;
             border: 2px solid #c7d2fe;
         }
+
         #video-progress::-moz-range-thumb {
             width: 14px;
             height: 14px;
@@ -43,30 +62,33 @@
         }
     </style>
 </head>
+
 <body class="bg-[#0f172a] text-slate-200 overflow-hidden">
 
-<div class="flex h-screen flex-col md:flex-row">
-    <!-- Sidebar bên trái -->
-    <div class="w-full md:w-80 bg-[#1e293b] border-r border-slate-700 flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-slate-700 bg-[#1e293b] z-10">
-            <a th:href="@{/student/my-courses}" class="text-xs font-bold text-indigo-400 uppercase tracking-widest hover:text-white transition flex items-center gap-2">
-                <span>←</span> Quay lại khóa học
-            </a>
-            <h1 class="mt-4 font-black text-white text-lg leading-tight" th:text="${course.title}">Tên khóa học</h1>
+    <div class="flex h-screen flex-col md:flex-row">
+        <!-- Sidebar bên trái -->
+        <div class="w-full md:w-80 bg-[#1e293b] border-r border-slate-700 flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-700 bg-[#1e293b] z-10">
+                <a th:href="@{/student/my-courses}"
+                    class="text-xs font-bold text-indigo-400 uppercase tracking-widest hover:text-white transition flex items-center gap-2">
+                    <span>←</span> Quay lại khóa học
+                </a>
+                <h1 class="mt-4 font-black text-white text-lg leading-tight" th:text="${course.title}">Tên khóa học</h1>
 
-            <div class="mt-4 flex items-center gap-2">
-                <div class="flex-1 bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-indigo-500 h-full transition-all duration-500"
-                         th:style="'width: ' + ${enrollment.progressPercentage} + '%'"></div>
+                <div class="mt-4 flex items-center gap-2">
+                    <div class="flex-1 bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-full transition-all duration-500"
+                            th:style="'width: ' + ${enrollment.progressPercentage} + '%'"></div>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400"
+                        th:text="${#numbers.formatDecimal(enrollment.progressPercentage, 0, 0) + '%'}">0%</span>
                 </div>
-                <span class="text-[10px] font-bold text-slate-400" th:text="${#numbers.formatDecimal(enrollment.progressPercentage, 0, 0) + '%'}">0%</span>
             </div>
-        </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-            <div th:each="lesson, i : ${course.lessons}"
-                 class="lesson-item p-4 rounded-2xl hover:bg-slate-700/50 cursor-pointer transition border border-transparent hover:border-slate-600 group"
-                 th:attr="
+            <div class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                <div th:each="lesson, i : ${course.lessons}"
+                    class="lesson-item p-4 rounded-2xl hover:bg-slate-700/50 cursor-pointer transition border border-transparent hover:border-slate-600 group"
+                    th:attr="
                     data-id=${lesson.id},
                     data-video=${lesson.videoUrl},
                     data-title=${lesson.title},
@@ -74,475 +96,525 @@
                     data-quiz-id=${lesson.quiz != null ? lesson.quiz.id : ''},
                     data-quiz-completed=${completedQuizzes != null and lesson.quiz != null ? completedQuizzes.contains(lesson.quiz.id) : false},
                     data-lesson-completed=${completedLessons != null ? completedLessons.contains(lesson.id) : false}"
-                 onclick="handleLessonClick(this)">
+                    onclick="handleLessonClick(this)">
 
-                <div class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold transition-colors"
-                         th:classappend="${completedLessons != null and completedLessons.contains(lesson.id)} ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500 group-hover:text-white'">
-                        <span th:if="${completedLessons != null and completedLessons.contains(lesson.id)}">✔</span>
-                        <span th:unless="${completedLessons != null and completedLessons.contains(lesson.id)}" th:text="${i.count}">1</span>
-                    </div>
-                    <div class="flex-1">
-                        <span class="text-[10px] font-black text-slate-500 block mb-1 uppercase tracking-wider">Bài học</span>
-                        <span class="text-sm font-bold group-hover:text-white leading-snug block" th:text="${lesson.title}">Tiêu đề bài học</span>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold transition-colors"
+                            th:classappend="${completedLessons != null and completedLessons.contains(lesson.id)} ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500 group-hover:text-white'">
+                            <span th:if="${completedLessons != null and completedLessons.contains(lesson.id)}">✔</span>
+                            <span th:unless="${completedLessons != null and completedLessons.contains(lesson.id)}"
+                                th:text="${i.count}">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-slate-500 block mb-1 uppercase tracking-wider">Bài
+                                học</span>
+                            <span class="text-sm font-bold group-hover:text-white leading-snug block"
+                                th:text="${lesson.title}">Tiêu đề bài học</span>
 
-                        <!-- Hiển thị trạng thái quiz -->
-                        <div th:if="${lesson.quiz != null}" class="mt-2">
-                            <span th:if="${completedQuizzes != null and completedQuizzes.contains(lesson.quiz.id)}"
-                                  class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">
-                                ✅ Đã làm quiz
-                            </span>
-                            <span th:unless="${completedQuizzes != null and completedQuizzes.contains(lesson.quiz.id)}"
-                                  class="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded-full font-bold">
-                                📝 Quiz
-                            </span>
+                            <!-- Hiển thị trạng thái quiz -->
+                            <div th:if="${lesson.quiz != null}" class="mt-2">
+                                <span th:if="${completedQuizzes != null and completedQuizzes.contains(lesson.quiz.id)}"
+                                    class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">
+                                    ✅ Đã làm quiz
+                                </span>
+                                <span
+                                    th:unless="${completedQuizzes != null and completedQuizzes.contains(lesson.quiz.id)}"
+                                    class="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded-full font-bold">
+                                    📝 Quiz
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Khu vực chính bên phải -->
-    <div class="flex-1 flex flex-col h-full overflow-hidden">
-        <!-- Video player -->
-        <div class="flex-1 bg-[#0b1220] p-4 md:p-6 border-b border-slate-800">
-            <div class="player-shell h-full rounded-3xl border border-slate-700/70 shadow-2xl shadow-black/40 overflow-hidden flex flex-col">
-                <div class="px-5 py-3 border-b border-slate-700/70 flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] text-slate-400 uppercase tracking-widest font-black">Khung phát bài học</p>
-                        <p class="text-sm text-slate-300 font-semibold">Hỗ trợ video upload và YouTube</p>
+        <!-- Khu vực chính bên phải -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden">
+            <!-- Video player -->
+            <div class="flex-1 bg-[#0b1220] p-4 md:p-6 border-b border-slate-800">
+                <div
+                    class="player-shell h-full rounded-3xl border border-slate-700/70 shadow-2xl shadow-black/40 overflow-hidden flex flex-col">
+                    <div class="px-5 py-3 border-b border-slate-700/70 flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-widest font-black">Khung phát bài
+                                học</p>
+                            <p class="text-sm text-slate-300 font-semibold">Hỗ trợ video upload và YouTube</p>
+                        </div>
+                        <span id="video-type-badge"
+                            class="text-[10px] font-black px-3 py-1 rounded-full bg-slate-700 text-slate-300">Chưa chọn
+                            bài</span>
                     </div>
-                    <span id="video-type-badge" class="text-[10px] font-black px-3 py-1 rounded-full bg-slate-700 text-slate-300">Chưa chọn bài</span>
-                </div>
 
-                <div id="player-stage" class="relative flex-1 min-h-0 bg-black/40">
-                    <iframe id="youtube-player"
-                            class="player-media absolute inset-0 w-full h-full hidden"
+                    <div id="player-stage" class="relative flex-1 min-h-0 bg-black/40">
+                        <iframe id="youtube-player" class="player-media absolute inset-0 w-full h-full hidden"
                             frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen>
-                    </iframe>
-                    <video id="local-video-player"
-                           class="player-media absolute inset-0 w-full h-full hidden"
-                           playsinline
-                           preload="metadata">
-                    </video>
+                        </iframe>
+                        <video id="local-video-player" class="player-media absolute inset-0 w-full h-full hidden"
+                            playsinline preload="metadata">
+                        </video>
 
-                    <div id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-center bg-slate-900/90">
-                        <div class="max-w-sm px-6">
-                            <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/50 animate-bounce">
-                                <span class="text-3xl text-white">▶</span>
+                        <div id="video-placeholder"
+                            class="absolute inset-0 flex items-center justify-center text-center bg-slate-900/90">
+                            <div class="max-w-sm px-6">
+                                <div
+                                    class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/50 animate-bounce">
+                                    <span class="text-3xl text-white">▶</span>
+                                </div>
+                                <h2 class="text-xl font-bold text-white">Sẵn sàng học tập?</h2>
+                                <p class="text-slate-400 mt-2">Hãy chọn một bài học từ danh sách bên trái để bắt đầu bài
+                                    giảng ngay nhé!</p>
                             </div>
-                            <h2 class="text-xl font-bold text-white">Sẵn sàng học tập?</h2>
-                            <p class="text-slate-400 mt-2">Hãy chọn một bài học từ danh sách bên trái để bắt đầu bài giảng ngay nhé!</p>
+                        </div>
+                    </div>
+
+                    <div id="local-video-controls"
+                        class="hidden px-4 md:px-5 py-3 border-t border-slate-700/70 bg-slate-900/80">
+                        <div class="flex items-center gap-3">
+                            <button id="btn-play-pause" type="button"
+                                class="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition">
+                                ▶
+                            </button>
+                            <input id="video-progress" type="range" min="0" max="100" value="0" step="0.1"
+                                class="flex-1">
+                            <span id="video-current-time"
+                                class="text-xs font-bold text-slate-200 min-w-10 text-right">00:00</span>
+                            <span class="text-slate-500 text-xs">/</span>
+                            <span id="video-duration" class="text-xs font-bold text-slate-400 min-w-10">00:00</span>
+                            <button id="btn-video-fullscreen" type="button"
+                                class="px-3 py-1.5 text-[11px] font-black rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
+                                Toàn màn hình
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="local-video-controls" class="hidden px-4 md:px-5 py-3 border-t border-slate-700/70 bg-slate-900/80">
-                    <div class="flex items-center gap-3">
-                        <button id="btn-play-pause" type="button" class="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition">
-                            ▶
-                        </button>
-                        <input id="video-progress" type="range" min="0" max="100" value="0" step="0.1" class="flex-1">
-                        <span id="video-current-time" class="text-xs font-bold text-slate-200 min-w-10 text-right">00:00</span>
-                        <span class="text-slate-500 text-xs">/</span>
-                        <span id="video-duration" class="text-xs font-bold text-slate-400 min-w-10">00:00</span>
-                        <button id="btn-video-fullscreen" type="button" class="px-3 py-1.5 text-[11px] font-black rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
-                            Toàn màn hình
-                        </button>
-                    </div>
+            <!-- Thanh điều khiển -->
+            <div class="bg-[#1e293b] px-8 py-4 flex justify-between items-center border-t border-slate-700">
+                <div class="flex flex-col">
+                    <span id="current-lesson-label"
+                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Đang phát</span>
+                    <span id="current-lesson-title" class="font-bold text-indigo-400">Vui lòng chọn bài học...</span>
                 </div>
-            </div>
-        </div>
 
-        <!-- Thanh điều khiển -->
-        <div class="bg-[#1e293b] px-8 py-4 flex justify-between items-center border-t border-slate-700">
-            <div class="flex flex-col">
-                <span id="current-lesson-label" class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Đang phát</span>
-                <span id="current-lesson-title" class="font-bold text-indigo-400">Vui lòng chọn bài học...</span>
-            </div>
-
-            <div class="flex gap-3">
-                <a id="btn-quiz" href="#"
-                   class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg shadow-indigo-900/20 active:scale-95 items-center gap-2">
-                    <span>📝</span> Làm quiz
-                </a>
-                <button onclick="markAsCompleted()" id="btn-complete"
+                <div class="flex gap-3">
+                    <a id="btn-quiz" href="#"
+                        class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg shadow-indigo-900/20 active:scale-95 items-center gap-2">
+                        <span>📝</span> Làm quiz
+                    </a>
+                    <button onclick="markAsCompleted()" id="btn-complete"
                         class="hidden bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg shadow-emerald-900/20 active:scale-95">
-                    ✔ Hoàn thành bài học
-                </button>
-            </div>
-        </div>
-
-        <!-- Phần nội dung bên dưới -->
-        <div class="p-8 bg-[#0f172a] border-t border-slate-800 overflow-y-auto h-[30vh] custom-scrollbar">
-            <div class="max-w-4xl">
-                <div id="lesson-description" class="mb-8">
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
-                        Mô tả bài học
-                    </h3>
-                    <p id="lesson-content" class="text-slate-400 leading-relaxed">
-                        Chọn một bài học để xem nội dung...
-                    </p>
+                        ✔ Hoàn thành bài học
+                    </button>
                 </div>
+            </div>
 
-                <div id="quiz-result" class="hidden">
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
-                        Kết quả quiz
-                    </h3>
-                    <div class="quiz-card rounded-2xl p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-emerald-400 font-bold text-lg" id="quiz-score">0/10</span>
-                            <span id="quiz-difficulty" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700">Đang tải...</span>
+            <!-- Phần nội dung bên dưới -->
+            <div class="p-8 bg-[#0f172a] border-t border-slate-800 overflow-y-auto h-[30vh] custom-scrollbar">
+                <div class="max-w-4xl">
+                    <div id="lesson-description" class="mb-8">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
+                            Mô tả bài học
+                        </h3>
+                        <p id="lesson-content" class="text-slate-400 leading-relaxed">
+                            Chọn một bài học để xem nội dung...
+                        </p>
+                    </div>
+
+                    <div id="quiz-result" class="hidden">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                            Kết quả quiz
+                        </h3>
+                        <div class="quiz-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-emerald-400 font-bold text-lg" id="quiz-score">0/10</span>
+                                <span id="quiz-difficulty"
+                                    class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700">Đang tải...</span>
+                            </div>
+                            <p id="quiz-feedback" class="text-slate-300 text-sm">Chưa có đánh giá</p>
+                            <a id="review-quiz-link" href="#"
+                                class="mt-4 inline-block text-indigo-400 text-sm hover:underline">
+                                Xem chi tiết →
+                            </a>
                         </div>
-                        <p id="quiz-feedback" class="text-slate-300 text-sm">Chưa có đánh giá</p>
-                        <a id="review-quiz-link" href="#" class="mt-4 inline-block text-indigo-400 text-sm hover:underline">
-                            Xem chi tiết →
-                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    let currentLessonId = null;
-    let currentQuizId = null;
-    let currentQuizCompleted = false;
-    let isSeeking = false;
-    const enrollmentId = [[${enrollment.id}]];
-    const quizAttempts = [[${quizAttempts}]];
-    const completedQuizzes = [[${completedQuizzes}]];
+    <script>
+        let currentLessonId = null;
+        let currentQuizId = null;
+        let currentQuizCompleted = false;
+        let isSeeking = false;
+        const enrollmentId = [[${ enrollment.id }]];
+        const quizAttempts = [[${ quizAttempts }]];
+        const completedQuizzes = [[${ completedQuizzes }]];
 
-    function formatTime(seconds) {
-        if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+        function formatTime(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
 
-        const totalSeconds = Math.floor(seconds);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
+            const totalSeconds = Math.floor(seconds);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
 
-        if (hours > 0) {
-            return String(hours) + ':' + String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            if (hours > 0) {
+                return String(hours) + ':' + String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            }
+
+            return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
         }
 
-        return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-    }
+        function setVideoTypeBadge(text, theme) {
+            const badge = document.getElementById('video-type-badge');
+            if (!badge) return;
 
-    function setVideoTypeBadge(text, theme) {
-        const badge = document.getElementById('video-type-badge');
-        if (!badge) return;
+            badge.innerText = text;
+            badge.classList.remove('bg-slate-700', 'text-slate-300', 'bg-indigo-600', 'text-white', 'bg-red-600');
 
-        badge.innerText = text;
-        badge.classList.remove('bg-slate-700', 'text-slate-300', 'bg-indigo-600', 'text-white', 'bg-red-600');
-
-        if (theme === 'local') {
-            badge.classList.add('bg-indigo-600', 'text-white');
-        } else if (theme === 'error') {
-            badge.classList.add('bg-red-600', 'text-white');
-        } else {
-            badge.classList.add('bg-slate-700', 'text-slate-300');
-        }
-    }
-
-    function resetLocalPlayerUi() {
-        const progress = document.getElementById('video-progress');
-        const currentTime = document.getElementById('video-current-time');
-        const duration = document.getElementById('video-duration');
-        const playBtn = document.getElementById('btn-play-pause');
-
-        progress.value = 0;
-        currentTime.innerText = '00:00';
-        duration.innerText = '00:00';
-        playBtn.innerText = '▶';
-        isSeeking = false;
-    }
-
-    function syncLocalPlayerUi() {
-        const player = document.getElementById('local-video-player');
-        const progress = document.getElementById('video-progress');
-        const currentTime = document.getElementById('video-current-time');
-        const duration = document.getElementById('video-duration');
-        const playBtn = document.getElementById('btn-play-pause');
-
-        const total = Number.isFinite(player.duration) ? player.duration : 0;
-        const current = Number.isFinite(player.currentTime) ? player.currentTime : 0;
-
-        if (!isSeeking && total > 0) {
-            progress.value = (current / total) * 100;
-        }
-
-        currentTime.innerText = formatTime(current);
-        duration.innerText = formatTime(total);
-        playBtn.innerText = player.paused ? '▶' : '❚❚';
-    }
-
-    function bindLocalVideoControls() {
-        const player = document.getElementById('local-video-player');
-        const progress = document.getElementById('video-progress');
-        const playBtn = document.getElementById('btn-play-pause');
-        const fullscreenBtn = document.getElementById('btn-video-fullscreen');
-        const stage = document.getElementById('player-stage');
-
-        playBtn.addEventListener('click', function () {
-            if (player.paused) {
-                player.play().catch(() => {});
+            if (theme === 'local') {
+                badge.classList.add('bg-indigo-600', 'text-white');
+            } else if (theme === 'error') {
+                badge.classList.add('bg-red-600', 'text-white');
             } else {
-                player.pause();
+                badge.classList.add('bg-slate-700', 'text-slate-300');
             }
-        });
+        }
 
-        progress.addEventListener('input', function () {
-            isSeeking = true;
-            if (Number.isFinite(player.duration) && player.duration > 0) {
-                player.currentTime = (Number(progress.value) / 100) * player.duration;
-            }
-            syncLocalPlayerUi();
-        });
+        function resetLocalPlayerUi() {
+            const progress = document.getElementById('video-progress');
+            const currentTime = document.getElementById('video-current-time');
+            const duration = document.getElementById('video-duration');
+            const playBtn = document.getElementById('btn-play-pause');
 
-        progress.addEventListener('change', function () {
+            progress.value = 0;
+            currentTime.innerText = '00:00';
+            duration.innerText = '00:00';
+            playBtn.innerText = '▶';
             isSeeking = false;
-        });
+        }
 
-        fullscreenBtn.addEventListener('click', function () {
-            if (stage.requestFullscreen) {
-                stage.requestFullscreen();
+        function syncLocalPlayerUi() {
+            const player = document.getElementById('local-video-player');
+            const progress = document.getElementById('video-progress');
+            const currentTime = document.getElementById('video-current-time');
+            const duration = document.getElementById('video-duration');
+            const playBtn = document.getElementById('btn-play-pause');
+
+            const total = Number.isFinite(player.duration) ? player.duration : 0;
+            const current = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+
+            if (!isSeeking && total > 0) {
+                progress.value = (current / total) * 100;
             }
-        });
 
-        player.addEventListener('loadedmetadata', syncLocalPlayerUi);
-        player.addEventListener('timeupdate', syncLocalPlayerUi);
-        player.addEventListener('play', syncLocalPlayerUi);
-        player.addEventListener('pause', syncLocalPlayerUi);
-        player.addEventListener('ended', syncLocalPlayerUi);
-    }
-
-    let currentLessonCompleted = false;
-
-    function handleLessonClick(element) {
-        currentLessonId = element.getAttribute('data-id');
-        const videoSource = element.getAttribute('data-video');
-        const title = element.getAttribute('data-title');
-        const content = element.getAttribute('data-content') || 'Bài học này chưa có nội dung chi tiết.';
-        currentQuizId = element.getAttribute('data-quiz-id');
-        currentQuizCompleted = element.getAttribute('data-quiz-completed') === 'true';
-        currentLessonCompleted = element.getAttribute('data-lesson-completed') === 'true';
-
-        // Update active state
-        document.querySelectorAll('.lesson-item').forEach(item => {
-            item.classList.remove('bg-slate-700/80', 'border-slate-500');
-        });
-        element.classList.add('bg-slate-700/80', 'border-slate-500');
-
-        // Update content
-        document.getElementById('lesson-content').innerText = content;
-        document.getElementById('current-lesson-title').innerText = title;
-
-        // Handle video
-        playVideo(videoSource);
-
-        // Update quiz and complete buttons
-        updateActionButtons();
-
-        // Update quiz result
-        updateQuizResult();
-    }
-
-    // ... (Keep intermediate functions unchanged)
-    function isLocalVideoUrl(videoSource) {
-        if (!videoSource) return false;
-        const value = videoSource.trim().toLowerCase();
-        return value.startsWith('/uploads/') || value.startsWith('uploads/') || value.endsWith('.mp4') || value.endsWith('.webm');
-    }
-
-    function resolveLocalVideoUrl(videoSource) {
-        const value = videoSource.trim().replace(/\\/g, '/');
-        const lower = value.toLowerCase();
-
-        if (lower.startsWith('http://') || lower.startsWith('https://') || value.startsWith('/')) {
-            return value;
+            currentTime.innerText = formatTime(current);
+            duration.innerText = formatTime(total);
+            playBtn.innerText = player.paused ? '▶' : '❚❚';
         }
 
-        if (value.startsWith('uploads/')) {
-            return '/' + value;
-        }
+        function bindLocalVideoControls() {
+            const player = document.getElementById('local-video-player');
+            const progress = document.getElementById('video-progress');
+            const playBtn = document.getElementById('btn-play-pause');
+            const fullscreenBtn = document.getElementById('btn-video-fullscreen');
+            const stage = document.getElementById('player-stage');
 
-        return '/uploads/videos/' + value;
-    }
+            playBtn.addEventListener('click', function () {
+                if (player.paused) {
+                    player.play().catch(() => { });
+                } else {
+                    player.pause();
+                }
+            });
 
-    function extractYoutubeId(videoSource) {
-        if (!videoSource) return null;
-        const value = videoSource.trim();
-
-        if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
-            return value;
-        }
-
-        const patterns = [
-            /[?&]v=([^&#]{11})/,
-            /youtu\.be\/([^?&#]{11})/,
-            /youtube\.com\/embed\/([^?&#]{11})/,
-            /youtube\.com\/shorts\/([^?&#]{11})/
-        ];
-
-        for (const pattern of patterns) {
-            const match = value.match(pattern);
-            if (match && match[1]) {
-                return match[1];
-            }
-        }
-
-        return null;
-    }
-
-    function playVideo(videoSource) {
-        // ... (existing code for this remains unchanged)
-        const youtubePlayer = document.getElementById('youtube-player');
-        const localPlayer = document.getElementById('local-video-player');
-        const localControls = document.getElementById('local-video-controls');
-        const placeholder = document.getElementById('video-placeholder');
-        
-        if (videoSource && videoSource !== 'null' && videoSource !== '') {
-            if (isLocalVideoUrl(videoSource)) {
-                youtubePlayer.src = '';
-                youtubePlayer.classList.add('hidden');
-
-                localPlayer.src = resolveLocalVideoUrl(videoSource);
-                localPlayer.classList.remove('hidden');
-                localControls.classList.remove('hidden');
-                localPlayer.load();
-                localPlayer.play().catch(() => {});
-                setVideoTypeBadge('Video upload', 'local');
+            progress.addEventListener('input', function () {
+                isSeeking = true;
+                if (Number.isFinite(player.duration) && player.duration > 0) {
+                    player.currentTime = (Number(progress.value) / 100) * player.duration;
+                }
                 syncLocalPlayerUi();
-            } else {
-                const embedId = extractYoutubeId(videoSource);
-                if (!embedId) {
+            });
+
+            progress.addEventListener('change', function () {
+                isSeeking = false;
+            });
+
+            fullscreenBtn.addEventListener('click', function () {
+                if (stage.requestFullscreen) {
+                    stage.requestFullscreen();
+                }
+            });
+
+            player.addEventListener('loadedmetadata', syncLocalPlayerUi);
+            player.addEventListener('timeupdate', syncLocalPlayerUi);
+            player.addEventListener('play', syncLocalPlayerUi);
+            player.addEventListener('pause', syncLocalPlayerUi);
+            player.addEventListener('ended', syncLocalPlayerUi);
+        }
+
+        let currentLessonCompleted = false;
+
+        function handleLessonClick(element) {
+            currentLessonId = element.getAttribute('data-id');
+            const videoSource = element.getAttribute('data-video');
+            const title = element.getAttribute('data-title');
+            const content = element.getAttribute('data-content') || 'Bài học này chưa có nội dung chi tiết.';
+            currentQuizId = element.getAttribute('data-quiz-id');
+            currentQuizCompleted = element.getAttribute('data-quiz-completed') === 'true';
+            currentLessonCompleted = element.getAttribute('data-lesson-completed') === 'true';
+
+            // Update active state
+            document.querySelectorAll('.lesson-item').forEach(item => {
+                item.classList.remove('bg-slate-700/80', 'border-slate-500');
+            });
+            element.classList.add('bg-slate-700/80', 'border-slate-500');
+
+            // Update content
+            document.getElementById('lesson-content').innerText = content;
+            document.getElementById('current-lesson-title').innerText = title;
+
+            // Handle video
+            playVideo(videoSource);
+
+            // Update quiz and complete buttons
+            updateActionButtons();
+
+            // Update quiz result
+            updateQuizResult();
+        }
+
+        // ... (Keep intermediate functions unchanged)
+        function isLocalVideoUrl(videoSource) {
+            if (!videoSource) return false;
+            const value = videoSource.trim().toLowerCase();
+            return value.startsWith('/uploads/') || value.startsWith('uploads/') || value.endsWith('.mp4') || value.endsWith('.webm');
+        }
+
+        function resolveLocalVideoUrl(videoSource) {
+            const value = videoSource.trim().replace(/\\/g, '/');
+            const lower = value.toLowerCase();
+
+            if (lower.startsWith('http://') || lower.startsWith('https://') || value.startsWith('/')) {
+                return value;
+            }
+
+            if (value.startsWith('uploads/')) {
+                return '/' + value;
+            }
+
+            return '/uploads/videos/' + value;
+        }
+
+        function extractYoutubeId(videoSource) {
+            if (!videoSource) return null;
+            const value = videoSource.trim();
+
+            if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
+                return value;
+            }
+
+            const patterns = [
+                /[?&]v=([^&#]{11})/,
+                /youtu\.be\/([^?&#]{11})/,
+                /youtube\.com\/embed\/([^?&#]{11})/,
+                /youtube\.com\/shorts\/([^?&#]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = value.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+
+            return null;
+        }
+
+        function playVideo(videoSource) {
+            // ... (existing code for this remains unchanged)
+            const youtubePlayer = document.getElementById('youtube-player');
+            const localPlayer = document.getElementById('local-video-player');
+            const localControls = document.getElementById('local-video-controls');
+            const placeholder = document.getElementById('video-placeholder');
+
+            if (videoSource && videoSource !== 'null' && videoSource !== '') {
+                if (isLocalVideoUrl(videoSource)) {
                     youtubePlayer.src = '';
                     youtubePlayer.classList.add('hidden');
+
+                    localPlayer.src = resolveLocalVideoUrl(videoSource);
+                    localPlayer.classList.remove('hidden');
+                    localControls.classList.remove('hidden');
+                    localPlayer.load();
+                    localPlayer.play().catch(() => { });
+                    setVideoTypeBadge('Video upload', 'local');
+                    syncLocalPlayerUi();
+                } else {
+                    const embedId = extractYoutubeId(videoSource);
+                    if (!embedId) {
+                        youtubePlayer.src = '';
+                        youtubePlayer.classList.add('hidden');
+                        localPlayer.pause();
+                        localPlayer.removeAttribute('src');
+                        localPlayer.load();
+                        localPlayer.classList.add('hidden');
+                        localControls.classList.add('hidden');
+                        resetLocalPlayerUi();
+                        placeholder.classList.remove('hidden');
+                        setVideoTypeBadge('Video không hợp lệ', 'error');
+                        return;
+                    }
+
                     localPlayer.pause();
                     localPlayer.removeAttribute('src');
                     localPlayer.load();
                     localPlayer.classList.add('hidden');
                     localControls.classList.add('hidden');
                     resetLocalPlayerUi();
-                    placeholder.classList.remove('hidden');
-                    setVideoTypeBadge('Video không hợp lệ', 'error');
-                    return;
+
+                    youtubePlayer.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0";
+                    youtubePlayer.classList.remove('hidden');
+                    setVideoTypeBadge('YouTube', 'default');
                 }
 
+                placeholder.classList.add('hidden');
+            } else {
+                youtubePlayer.src = '';
+                youtubePlayer.classList.add('hidden');
                 localPlayer.pause();
                 localPlayer.removeAttribute('src');
                 localPlayer.load();
                 localPlayer.classList.add('hidden');
                 localControls.classList.add('hidden');
                 resetLocalPlayerUi();
-
-                youtubePlayer.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0";
-                youtubePlayer.classList.remove('hidden');
-                setVideoTypeBadge('YouTube', 'default');
+                placeholder.classList.remove('hidden');
+                setVideoTypeBadge('Chưa chọn bài', 'default');
             }
-
-            placeholder.classList.add('hidden');
-        } else {
-            youtubePlayer.src = '';
-            youtubePlayer.classList.add('hidden');
-            localPlayer.pause();
-            localPlayer.removeAttribute('src');
-            localPlayer.load();
-            localPlayer.classList.add('hidden');
-            localControls.classList.add('hidden');
-            resetLocalPlayerUi();
-            placeholder.classList.remove('hidden');
-            setVideoTypeBadge('Chưa chọn bài', 'default');
         }
-    }
 
-    function updateActionButtons() {
-        const btnQuiz = document.getElementById('btn-quiz');
-        const btnComplete = document.getElementById('btn-complete');
-        
-        btnQuiz.classList.add('hidden');
-        btnComplete.classList.add('hidden');
+        function updateActionButtons() {
+            const btnQuiz = document.getElementById('btn-quiz');
+            const btnComplete = document.getElementById('btn-complete');
 
-        if (currentQuizId && currentQuizId !== '' && currentQuizId !== 'null') {
-            // Lesson has a quiz
-            btnQuiz.classList.remove('hidden');
-            if (currentQuizCompleted) {
-                btnQuiz.innerHTML = '<span>📋</span> Xem lại quiz';
-                btnQuiz.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
-                btnQuiz.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
-            } else {
-                btnQuiz.innerHTML = '<span>📝</span> Làm quiz';
-                btnQuiz.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
-                btnQuiz.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
-            }
-            btnQuiz.href = '/student/quiz/' + currentQuizId + '/take';
-        } else {
-            // No quiz, show complete button
-            if (currentLessonId) {
-                btnComplete.classList.remove('hidden');
-                if (currentLessonCompleted) {
-                    btnComplete.innerHTML = '✔ Đã hoàn thành';
-                    btnComplete.classList.remove('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
-                    btnComplete.classList.add('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
-                    btnComplete.disabled = true;
+            btnQuiz.classList.add('hidden');
+            btnComplete.classList.add('hidden');
+
+            if (currentQuizId && currentQuizId !== '' && currentQuizId !== 'null') {
+                // Lesson has a quiz
+                btnQuiz.classList.remove('hidden');
+                if (currentQuizCompleted) {
+                    btnQuiz.innerHTML = '<span>📋</span> Xem lại quiz';
+                    btnQuiz.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+                    btnQuiz.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
                 } else {
-                    btnComplete.innerHTML = '✔ Hoàn thành bài học';
-                    btnComplete.classList.remove('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
-                    btnComplete.classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
-                    btnComplete.disabled = false;
+                    btnQuiz.innerHTML = '<span>📝</span> Làm quiz';
+                    btnQuiz.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+                    btnQuiz.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                }
+                btnQuiz.href = '/student/quiz/' + currentQuizId + '/take';
+            } else {
+                // No quiz, show complete button
+                if (currentLessonId) {
+                    btnComplete.classList.remove('hidden');
+                    if (currentLessonCompleted) {
+                        btnComplete.innerHTML = '✔ Đã hoàn thành';
+                        btnComplete.classList.remove('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
+                        btnComplete.classList.add('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
+                        btnComplete.disabled = true;
+                    } else {
+                        btnComplete.innerHTML = '✔ Hoàn thành bài học';
+                        btnComplete.classList.remove('bg-slate-600', 'cursor-not-allowed', 'opacity-70');
+                        btnComplete.classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'cursor-pointer');
+                        btnComplete.disabled = false;
+                    }
                 }
             }
         }
-    }
 
-    function updateQuizResult() {
-        const quizResultDiv = document.getElementById('quiz-result');
-        const lessonDescDiv = document.getElementById('lesson-description');
+        function updateQuizResult() {
+            const quizResultDiv = document.getElementById('quiz-result');
+            const lessonDescDiv = document.getElementById('lesson-description');
 
-        if (currentQuizCompleted && quizAttempts && quizAttempts.length > 0) {
-            const attempt = quizAttempts.find(a => a && a.quiz && a.quiz.id == currentQuizId);
-            if (attempt) {
-                document.getElementById('quiz-score').innerText = attempt.score + '/' + attempt.totalQuestions;
-                document.getElementById('quiz-difficulty').innerText = attempt.quiz.difficulty;
-                document.getElementById('quiz-feedback').innerText = attempt.aiFeedback || 'Chưa có đánh giá';
-                document.getElementById('review-quiz-link').href = '/student/quiz/result/' + attempt.id;
-                quizResultDiv.classList.remove('hidden');
-                lessonDescDiv.classList.add('hidden');
+            if (currentQuizCompleted && quizAttempts && quizAttempts.length > 0) {
+                const attempt = quizAttempts.find(a => a && a.quiz && a.quiz.id == currentQuizId);
+                if (attempt) {
+                    document.getElementById('quiz-score').innerText = attempt.score + '/' + attempt.totalQuestions;
+                    document.getElementById('quiz-difficulty').innerText = attempt.quiz.difficulty;
+                    document.getElementById('quiz-feedback').innerText = attempt.aiFeedback || 'Chưa có đánh giá';
+                    document.getElementById('review-quiz-link').href = '/student/quiz/result/' + attempt.id;
+                    quizResultDiv.classList.remove('hidden');
+                    lessonDescDiv.classList.add('hidden');
+                    return;
+                }
+            }
+            quizResultDiv.classList.add('hidden');
+            lessonDescDiv.classList.remove('hidden');
+        }
+
+        function markAsCompleted() {
+            if (!currentLessonId) {
+                alert("Vui lòng chọn bài học trước!");
                 return;
             }
-        }
-        quizResultDiv.classList.add('hidden');
-        lessonDescDiv.classList.remove('hidden');
-    }
 
-    function markAsCompleted() {
-        if (!currentLessonId) {
-            alert("Vui lòng chọn bài học trước!");
-            return;
-        }
-        // Call API to mark lesson as completed
-        fetch('/student/api/lesson/' + currentLessonId + '/complete?enrollmentId=' + enrollmentId, {
-            method: 'POST'
-        }).then(() => location.reload());
-    }
+            // Keep track of the next lesson to play after reload
+            const currentLessonElem = document.querySelector('.lesson-item[data-id="' + currentLessonId + '"]');
+            if (currentLessonElem && currentLessonElem.nextElementSibling) {
+                sessionStorage.setItem('targetLessonId_' + enrollmentId, currentLessonElem.nextElementSibling.getAttribute('data-id'));
+            }
 
-    // Auto-select first lesson
-    document.addEventListener('DOMContentLoaded', function() {
-        bindLocalVideoControls();
-        const firstLesson = document.querySelector('.lesson-item');
-        if (firstLesson) {
-            firstLesson.click();
-        } else {
-            setVideoTypeBadge('Chưa chọn bài', 'default');
+            // Call API to mark lesson as completed
+            fetch('/student/api/lesson/' + currentLessonId + '/complete?enrollmentId=' + enrollmentId, {
+                method: 'POST'
+            }).then(() => location.reload());
         }
-    });
-</script>
+
+        // Auto-select lesson
+        document.addEventListener('DOMContentLoaded', function () {
+            bindLocalVideoControls();
+            const urlParams = new URLSearchParams(window.location.search);
+            let targetLessonId = urlParams.get('lessonId');
+
+            // If not in URL, try sessionStorage
+            if (!targetLessonId) {
+                targetLessonId = sessionStorage.getItem('targetLessonId_' + enrollmentId);
+                sessionStorage.removeItem('targetLessonId_' + enrollmentId); // Clear after use
+            }
+
+            let targetLesson = null;
+            if (targetLessonId) {
+                targetLesson = document.querySelector('.lesson-item[data-id="' + targetLessonId + '"]');
+            }
+
+            if (!targetLesson) {
+                // Default to the first lesson that is NOT completed
+                const uncompletedLessons = document.querySelectorAll('.lesson-item[data-lesson-completed="false"]');
+                if (uncompletedLessons.length > 0) {
+                    targetLesson = uncompletedLessons[0];
+                } else {
+                    // Or just the first lesson if all completed
+                    targetLesson = document.querySelector('.lesson-item');
+                }
+            }
+
+            if (targetLesson) {
+                targetLesson.click();
+                // Scroll to the active lesson in sidebar
+                targetLesson.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                setVideoTypeBadge('Chưa chọn bài', 'default');
+            }
+        });
+    </script>
 
 </body>
+
 </html>

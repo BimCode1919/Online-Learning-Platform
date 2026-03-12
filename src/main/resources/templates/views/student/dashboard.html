@@ -84,8 +84,8 @@
                      class="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex items-center justify-between group hover:shadow-xl hover:shadow-indigo-50/50 transition-all duration-500">
 
                     <div class="flex-1">
-                        <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-widest">Course ID: [[${courseProgress.courseId}]]</span>
-                        <h4 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition-colors" th:text="${courseProgress.courseTitle}">Tên khóa học</h4>
+                        <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-widest">Course ID: [[${courseProgress.course.id}]]</span>
+                        <h4 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition-colors" th:text="${courseProgress.course.title}">Tên khóa học</h4>
 
                         <div class="mt-6 flex items-center space-x-4">
                             <div class="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -102,7 +102,7 @@
                     </div>
 
                     <div class="ml-8">
-                        <a th:href="@{/student/course/{id}(id=${courseProgress.courseId})}"
+                        <a th:href="@{/student/course/detail/{id}(id=${courseProgress.course.id})}"
                            class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:-rotate-12 transition-all duration-300 shadow-lg">
                             <span class="text-xl">➔</span>
                         </a>

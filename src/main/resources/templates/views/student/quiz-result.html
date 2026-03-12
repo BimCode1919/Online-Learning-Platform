@@ -154,7 +154,7 @@
         <span>📋</span> Xem lại chi tiết
       </a>
 
-      <a th:href="@{'/student/learning/' + ${quiz.lesson.course.id}}"
+      <a th:href="@{'/student/learning/' + ${quiz.lesson.course.id} + '?lessonId=' + ${quiz.lesson.id}}"
          class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
         <span>📚</span> Tiếp tục học
       </a>

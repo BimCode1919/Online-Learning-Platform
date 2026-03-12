@@ -35,6 +35,7 @@ public class StudentController {
     private final QuizRepository quizRepository;
     private final QuizAttemptService quizAttemptService;
     private final QuizAttemptRepository quizAttemptRepository;
+    private final org.oln.onlinelearningplatform.repository.UserProgressRepository userProgressRepository;
 
     public StudentController(CourseService courseService,
                              UserService userService,
@@ -43,7 +44,8 @@ public class StudentController {
                              EnrollmentRepository enrollmentRepository,
                              QuizRepository quizRepository,
                              QuizAttemptService quizAttemptService,
-                             QuizAttemptRepository quizAttemptRepository) {
+                             QuizAttemptRepository quizAttemptRepository,
+                             org.oln.onlinelearningplatform.repository.UserProgressRepository userProgressRepository) {
         this.courseService = courseService;
         this.userService = userService;
         this.enrollmentService = enrollmentService;
@@ -52,6 +54,7 @@ public class StudentController {
         this.quizRepository = quizRepository;
         this.quizAttemptService = quizAttemptService;
         this.quizAttemptRepository = quizAttemptRepository;
+        this.userProgressRepository = userProgressRepository;
     }
 
     // ============= DASHBOARD =============
@@ -83,7 +86,7 @@ public class StudentController {
 
     // ============= CHI TIẾT KHÓA HỌC =============
     @GetMapping("/course/detail/{id}")
-    public String viewCourseDetail(@PathVariable Long id,
+    public String viewCourseDetail(@PathVariable("id") Long id,
                                    @AuthenticationPrincipal UserDetails userDetails,
                                    Model model) {
         String email = userDetails.getUsername();
@@ -103,7 +106,7 @@ public class StudentController {
 
     // ============= ĐĂNG KÝ KHÓA HỌC =============
     @PostMapping("/course/enroll/{id}")
-    public String handleEnrollment(@PathVariable Long id,
+    public String handleEnrollment(@PathVariable("id") Long id,
                                    @AuthenticationPrincipal UserDetails userDetails,
                                    HttpServletRequest request) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -174,7 +177,7 @@ public class StudentController {
 
 //     ============= TRANG HỌC TẬP =============
     @GetMapping("/learning/{courseId}")
-    public String startLearning(@PathVariable Long courseId,
+    public String startLearning(@PathVariable("courseId") Long courseId,
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 Model model) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -190,12 +193,16 @@ public class StudentController {
         // Lấy danh sách quiz đã hoàn thành
         Set<Long> completedQuizzes = quizAttemptService.findCompletedQuizIdsByUserAndCourse(user.getId(), courseId);
 
+        // Lấy danh sách ID các bài học đã hoàn thành
+        Set<Long> completedLessons = userProgressRepository.findCompletedLessonIdsByUserAndCourse(user.getId(), courseId);
+
         // Lấy tất cả kết quả quiz của user trong khóa học này
         List<QuizAttempt> quizAttempts = quizAttemptService.findByUserAndCourse(user.getId(), courseId);
 
         model.addAttribute("course", course);
         model.addAttribute("enrollment", enrollment);
         model.addAttribute("completedQuizzes", completedQuizzes);
+        model.addAttribute("completedLessons", completedLessons);
         model.addAttribute("quizAttempts", quizAttempts);
 
         return "views/student/learning-dashboard";
@@ -207,7 +214,7 @@ public class StudentController {
      * Trang làm quiz
      */
     @GetMapping("/quiz/{quizId}/take")
-    public String takeQuiz(@PathVariable Long quizId,
+    public String takeQuiz(@PathVariable("quizId") Long quizId,
                            @AuthenticationPrincipal UserDetails userDetails,
                            Model model,
                            RedirectAttributes redirectAttributes) {
@@ -263,7 +270,7 @@ public class StudentController {
      * Xử lý nộp bài quiz
      */
     @PostMapping("/quiz/{quizId}/submit")
-    public String submitQuiz(@PathVariable Long quizId,
+    public String submitQuiz(@PathVariable("quizId") Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam(value = "selectedOptions") List<Long> selectedOptions,
                              RedirectAttributes redirectAttributes) {
@@ -329,6 +336,14 @@ public class StudentController {
 
         quizAttemptRepository.save(attempt);
 
+        // Automatically mark the lesson as completed when the quiz is submitted
+        if (quiz.getLesson() != null && quiz.getLesson().getCourse() != null) {
+            Enrollment enrollment = enrollmentService.findByUserAndCourse(user.getId(), quiz.getLesson().getCourse().getId());
+            if (enrollment != null) {
+                enrollmentService.updateProgress(enrollment, quiz.getLesson().getId());
+            }
+        }
+
         redirectAttributes.addFlashAttribute("success", "Hoàn thành quiz! Điểm: " + Math.round(score) + "%");
         return "redirect:/student/quiz/result/" + attempt.getId();
     }
@@ -337,7 +352,7 @@ public class StudentController {
      * Xem kết quả quiz
      */
     @GetMapping("/quiz/result/{attemptId}")
-    public String viewQuizResult(@PathVariable Long attemptId,
+    public String viewQuizResult(@PathVariable("attemptId") Long attemptId,
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  Model model) {
 
@@ -360,7 +375,7 @@ public class StudentController {
      * Xem lại chi tiết bài làm (câu nào đúng/sai)
      */
     @GetMapping("/quiz/review/{attemptId}")
-    public String reviewQuiz(@PathVariable Long attemptId,
+    public String reviewQuiz(@PathVariable("attemptId") Long attemptId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              Model model) {
 
@@ -397,8 +412,8 @@ public class StudentController {
      */
     @PostMapping("/api/lesson/{lessonId}/complete")
     @ResponseBody
-    public String completeLesson(@PathVariable Long lessonId,
-                                 @RequestParam Long enrollmentId,
+    public String completeLesson(@PathVariable("lessonId") Long lessonId,
+                                 @RequestParam("enrollmentId") Long enrollmentId,
                                  @AuthenticationPrincipal UserDetails userDetails) {
 
         User user = userService.findByEmail(userDetails.getUsername()); // Đổi tên biến
@@ -431,7 +446,7 @@ public class StudentController {
     }
 
     @PostMapping("/quiz/{quizId}/retake")
-    public String retakeQuiz(@PathVariable Long quizId,
+    public String retakeQuiz(@PathVariable("quizId") Long quizId,
                              @AuthenticationPrincipal UserDetails userDetails,
                              RedirectAttributes redirectAttributes) {
 

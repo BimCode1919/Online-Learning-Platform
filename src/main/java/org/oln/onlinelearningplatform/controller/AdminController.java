@@ -68,7 +68,7 @@ public class AdminController {
     }
 
     @PostMapping("/courses/approve/{id}")
-    public String approveCourse(@PathVariable Long id) {
+    public String approveCourse(@PathVariable("id") Long id) {
         courseService.updateCourseStatus(id, "APPROVE");
         return "redirect:/admin/courses/approval";
     }
@@ -81,7 +81,7 @@ public class AdminController {
     }
 
     @PostMapping("/courses/delete/{id}")
-    public String deleteCourseByAdmin(@PathVariable Long id, RedirectAttributes ra) {
+    public String deleteCourseByAdmin(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             courseService.deleteCourse(id); // Sử dụng hàm delete đã có
             ra.addFlashAttribute("success", "Đã xóa khóa học vĩnh viễn.");
@@ -92,7 +92,7 @@ public class AdminController {
     }
 
     @GetMapping("/course/{id}")
-    public String viewCourseContent(@PathVariable Long id, Model model) {
+    public String viewCourseContent(@PathVariable("id") Long id, Model model) {
         Course course = courseService.getCourseById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học với ID: " + id));
         model.addAttribute("course", course);
@@ -100,7 +100,7 @@ public class AdminController {
     }
 
     @PostMapping("/course/reject/{id}")
-    public String rejectCourse(@PathVariable Long id, @RequestParam("note") String note) {
+    public String rejectCourse(@PathVariable("id") Long id, @RequestParam("note") String note) {
         Course course = courseService.getCourseById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học với ID: " + id));
 
@@ -124,10 +124,10 @@ public class AdminController {
     }
 
     @PostMapping("/users/create")
-    public String createUser(@RequestParam String username,
-                             @RequestParam String email,
-                             @RequestParam String password,
-                             @RequestParam String role,
+    public String createUser(@RequestParam("username") String username,
+                             @RequestParam("email") String email,
+                             @RequestParam("password") String password,
+                             @RequestParam("role") String role,
                              RedirectAttributes ra) {
         try {
             User newUser = new User();
@@ -146,7 +146,7 @@ public class AdminController {
 
     // 5. Xóa User
     @GetMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public String deleteUser(@PathVariable("id") Long id) {
         userService.deleteUserById(id);
         return "redirect:/admin/users";
     }

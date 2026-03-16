@@ -23,6 +23,9 @@ public class Course {
     @Column(columnDefinition = "nvarchar(max)")
     private String description;
 
+    @Column(columnDefinition = "varchar(1000)")
+    private String imageUrl;
+
     private String status;
 
     @Column(columnDefinition = "nvarchar(max)")

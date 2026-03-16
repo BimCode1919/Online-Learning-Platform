@@ -27,9 +27,20 @@
         <div th:each="course : ${availableCourses}"
              class="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
-            <div class="h-48 bg-indigo-100 flex items-center justify-center relative">
-                <span class="text-5xl">📚</span>
-                <div class="absolute bottom-4 left-4">
+            <div class="h-48 bg-indigo-100 flex items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
+                <!-- Hiển thị ảnh nếu có -->
+                <img th:if="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
+                     th:src="${course.imageUrl}" 
+                     alt="Course Image" 
+                     class="absolute inset-0 w-full h-full object-cover"/>
+                
+                <!-- Fallback Emoji nếu không có ảnh -->
+                <span th:unless="${course.imageUrl != null and !course.imageUrl.isEmpty()}" class="text-5xl relative z-10">📚</span>
+
+                <!-- Đổ bóng đen mờ phía dưới để overlay text hiện rõ -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+                <div class="absolute bottom-4 left-4 z-10">
                     <span class="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase text-indigo-600 shadow-sm">
                         [[${course.lessons.size()}]] Bài học
                     </span>

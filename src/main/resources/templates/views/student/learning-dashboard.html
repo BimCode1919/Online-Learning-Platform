@@ -65,7 +65,7 @@
 
 <body class="bg-[#0f172a] text-slate-200 overflow-hidden">
 
-    <div class="flex h-screen flex-col md:flex-row">
+    <div class="flex h-screen flex-col-reverse md:flex-row">
         <!-- Sidebar bên trái -->
         <div class="w-full md:w-80 bg-[#1e293b] border-r border-slate-700 flex flex-col shadow-2xl">
             <div class="p-6 border-b border-slate-700 bg-[#1e293b] z-10">
@@ -183,6 +183,15 @@
                                 class="text-xs font-bold text-slate-200 min-w-10 text-right">00:00</span>
                             <span class="text-slate-500 text-xs">/</span>
                             <span id="video-duration" class="text-xs font-bold text-slate-400 min-w-10">00:00</span>
+                            
+                            <select id="video-speed" class="px-2 py-1 text-[11px] font-black rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 outline-none transition cursor-pointer">
+                                <option value="0.75">0.75x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                            </select>
+
                             <button id="btn-video-fullscreen" type="button"
                                 class="px-3 py-1.5 text-[11px] font-black rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
                                 Toàn màn hình
@@ -352,6 +361,13 @@
                     stage.requestFullscreen();
                 }
             });
+
+            const speedSelect = document.getElementById('video-speed');
+            if (speedSelect) {
+                speedSelect.addEventListener('change', function() {
+                    player.playbackRate = parseFloat(this.value);
+                });
+            }
 
             player.addEventListener('loadedmetadata', syncLocalPlayerUi);
             player.addEventListener('timeupdate', syncLocalPlayerUi);

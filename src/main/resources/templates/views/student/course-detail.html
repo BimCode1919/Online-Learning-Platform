@@ -23,8 +23,20 @@
     </a>
 
     <div class="grid grid-cols-1 gap-12">
-        <div class="bg-white rounded-[3rem] p-8 md:p-12 shadow-sm border border-slate-100 relative overflow-hidden">
-            <div class="relative z-10">
+        <div class="bg-white rounded-[3rem] p-8 md:p-12 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row gap-8 items-center">
+            
+            <!-- Image Section -->
+            <div class="w-full md:w-2/5 h-64 md:h-80 rounded-3xl overflow-hidden relative z-10 flex-shrink-0 shadow-lg">
+                <img th:if="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
+                     th:src="${course.imageUrl}" 
+                     alt="Course Image" 
+                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"/>
+                <div th:unless="${course.imageUrl != null and !course.imageUrl.isEmpty()}" class="w-full h-full bg-indigo-100 flex items-center justify-center">
+                    <span class="text-7xl">📚</span>
+                </div>
+            </div>
+
+            <div class="relative z-10 flex-1">
                 <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                     Nội dung chất lượng cao
                 </span>

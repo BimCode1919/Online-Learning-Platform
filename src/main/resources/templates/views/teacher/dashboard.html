@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,12 +97,24 @@
              th:if="${courses != null and !courses.isEmpty()}">
             <div th:each="course : ${courses}"
                  class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden course-card flex flex-col">
-                <div class="h-44 bg-slate-100 flex items-center justify-center relative group">
-                    <span class="text-5xl group-hover:scale-110 transition-transform duration-500">📖</span>
-                    <div class="absolute top-4 left-4 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-md">
+                <div class="h-44 bg-indigo-100 flex items-center justify-center relative overflow-hidden group">
+                    <!-- Hiển thị ảnh nếu có -->
+                    <img th:if="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
+                         th:src="${course.imageUrl}" 
+                         alt="Thumbnail khóa học" 
+                         class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+                    
+                    <!-- Fallback Emoji nếu không có ảnh -->
+                    <span th:unless="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
+                          class="text-5xl relative z-10 group-hover:scale-110 transition-transform duration-500">📖</span>
+
+                    <!-- Đổ bóng đen mờ phía dưới để overlay text hiện rõ (nếu cần) -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+                    <div class="absolute top-4 left-4 z-10 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-md">
                         Instructor
                     </div>
-                    <div class="absolute top-4 right-4 flex flex-col items-end">
+                    <div class="absolute top-4 right-4 z-10 flex flex-col items-end">
                     <span th:if="${course.status == 'PENDING'}"
                           class="bg-amber-100 text-amber-600 text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-sm border border-amber-200">
                         ⏳ Chờ duyệt

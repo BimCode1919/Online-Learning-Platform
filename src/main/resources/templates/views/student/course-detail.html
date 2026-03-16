@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +29,7 @@
             <div class="w-full md:w-2/5 h-64 md:h-80 rounded-3xl overflow-hidden relative z-10 flex-shrink-0 shadow-lg">
                 <img th:if="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
                      th:src="${course.imageUrl}" 
-                     alt="Course Image" 
+                     alt="Thumbnail khóa học" 
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"/>
                 <div th:unless="${course.imageUrl != null and !course.imageUrl.isEmpty()}" class="w-full h-full bg-indigo-100 flex items-center justify-center">
                     <span class="text-7xl">📚</span>
@@ -67,8 +67,8 @@
                     <div th:if="${enrollment == null}">
                         <form th:action="@{/student/course/enroll/{id}(id=${course.id})}" method="post">
                             <button type="submit"
-                                    class="bg-slate-900 text-white px-10 py-5 rounded-3xl font-black uppercase text-sm shadow-2xl hover:bg-indigo-600 transition-all active:scale-95 flex items-center">
-                                🚀 Thanh toán ngay — <span th:text="${course.price + ' VND'}"></span>
+                                    class="bg-slate-900 text-white px-10 py-5 rounded-3xl font-black uppercase text-sm shadow-2xl hover:bg-indigo-600 transition-all active:scale-95 flex items-center gap-2">
+                                🚀 Thanh toán ngay — <span th:text="${#numbers.formatInteger(course.price, 0, 'POINT')} + ' ₫'"></span>
                             </button>
                         </form>
                     </div>

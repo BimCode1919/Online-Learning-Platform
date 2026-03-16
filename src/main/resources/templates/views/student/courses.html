@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Khám phá khóa học | EduStack</title>
@@ -31,7 +31,7 @@
                 <!-- Hiển thị ảnh nếu có -->
                 <img th:if="${course.imageUrl != null and !course.imageUrl.isEmpty()}" 
                      th:src="${course.imageUrl}" 
-                     alt="Course Image" 
+                     alt="Thumbnail khóa học" 
                      class="absolute inset-0 w-full h-full object-cover"/>
                 
                 <!-- Fallback Emoji nếu không có ảnh -->
@@ -60,11 +60,20 @@
                     tả ngắn...</p>
 
                 <div class="mt-auto pt-6 flex items-center justify-between">
-                    <span class="text-indigo-600 font-black text-lg"
-                          th:text="${course.price > 0 ? course.price + ' VND' : 'Miễn phí'}">
-                    </span>
+                    <div th:if="${course.price > 0}" class="flex flex-col">
+                        <span class="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Giá khóa học</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-indigo-600 font-black text-xl tracking-tight"
+                                  th:text="${#numbers.formatInteger(course.price, 0, 'POINT')}">499.000</span>
+                            <span class="text-indigo-600 font-bold text-sm">₫</span>
+                        </div>
+                    </div>
+                    <div th:unless="${course.price > 0}" class="flex flex-col">
+                        <span class="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Trạng thái</span>
+                        <span class="text-emerald-600 font-black text-lg uppercase tracking-tight">Miễn phí</span>
+                    </div>
                     <a th:href="@{/student/course/detail/{id}(id=${course.id})}"
-                       class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors">
+                       class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200">
                         Xem chi tiết
                     </a>
                 </div>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Gói đăng ký Giảng viên | EduStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .pricing-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: #6366f1;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 40px rgba(99, 102, 241, 0.2);
+        }
+        .feature-check {
+            color: #10b981;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-200">
+
+    <div class="max-w-7xl mx-auto px-6 py-16">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-indigo-400 font-bold tracking-widest uppercase text-sm mb-4">Instructor Premium</h2>
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-6">Mở khóa sức mạnh của <span class="gradient-text">AI Quiz</span></h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+                Tự động tạo bộ câu hỏi trắc nghiệm từ video YouTube chỉ trong vài giây. Tiết kiệm hàng giờ soạn bài và nâng cao trải nghiệm học tập.
+            </p>
+        </div>
+
+        <!-- Active Subscription Banner -->
+        <div th:if="${activeSubscription != null}" class="max-w-3xl mx-auto mb-12 bg-indigo-500/10 border border-indigo-500/30 p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <h3 class="text-white font-bold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Bạn đang đăng ký gói <span th:text="${activeSubscription.planType}" class="text-indigo-400"></span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">
+                    Ngày hết hạn: <span th:text="${#temporals.format(activeSubscription.endDate, 'dd/MM/yyyy')}"></span>
+                </p>
+            </div>
+            <a href="/instructor/dashboard" class="text-sm font-bold text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-500 transition">Vào Dashboard</a>
+        </div>
+
+        <!-- Pricing Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            <!-- Monthly -->
+            <div class="pricing-card rounded-3xl p-8 flex flex-col">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-2">Gói tháng</h3>
+                    <p class="text-slate-400 text-sm">Trải nghiệm linh hoạt</p>
+                </div>
+                <div class="mb-8">
+                    <span class="text-4xl font-black text-white">249.000 ₫</span>
+                    <span class="text-slate-400">/tháng</span>
+                </div>
+                <ul class="space-y-4 mb-10 flex-1">
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Không giới hạn AI Gen Quiz
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Hỗ trợ video dài tới 30p
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Đầy đủ giải thích từ AI
+                    </li>
+                </ul>
+                <form th:action="@{/instructor/subscription/subscribe}" method="post">
+                    <input type="hidden" name="planType" value="MONTH">
+                    <button type="submit" class="w-full py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">Bắt đầu ngay</button>
+                </form>
+            </div>
+
+            <!-- Quarter (Popular) -->
+            <div class="pricing-card rounded-3xl p-8 flex flex-col relative scale-105 border-indigo-500/50 bg-indigo-500/5">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full">Phổ biến nhất</div>
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-2">Gói 3 tháng</h3>
+                    <p class="text-slate-400 text-sm">Tiết kiệm 20%</p>
+                </div>
+                <div class="mb-8">
+                    <span class="text-4xl font-black text-white">599.000 ₫</span>
+                    <span class="text-slate-400">/quý</span>
+                </div>
+                <ul class="space-y-4 mb-10 flex-1">
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Ưu tiên xử lý nhanh hơn
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Không giới hạn AI Gen Quiz
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Hỗ trợ video dài tới 1 tiếng
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Đầy đủ giải thích từ AI
+                    </li>
+                </ul>
+                <form th:action="@{/instructor/subscription/subscribe}" method="post">
+                    <input type="hidden" name="planType" value="QUARTER">
+                    <button type="submit" class="w-full py-4 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/30">Chọn gói này</button>
+                </form>
+            </div>
+
+            <!-- Yearly -->
+            <div class="pricing-card rounded-3xl p-8 flex flex-col">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-2">Gói năm</h3>
+                    <p class="text-slate-400 text-sm">Giá trị tốt nhất</p>
+                </div>
+                <div class="mb-8">
+                    <span class="text-4xl font-black text-white">1.999.000 ₫</span>
+                    <span class="text-slate-400">/năm</span>
+                </div>
+                <ul class="space-y-4 mb-10 flex-1">
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Miễn phí 4 tháng
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Không giới hạn AI Gen Quiz
+                    </li>
+                    <li class="flex items-center gap-3 text-sm">
+                        <span class="feature-check">✓</span> Hỗ trợ video không giới hạn độ dài
+                    </li>
+                    <li class="feature-check">✓</span> Support 24/7
+                    </li>
+                </ul>
+                <form th:action="@{/instructor/subscription/subscribe}" method="post">
+                    <input type="hidden" name="planType" value="YEAR">
+                    <button type="submit" class="w-full py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">Mua gói năm</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div th:if="${not #lists.isEmpty(history)}" class="max-w-4xl mx-auto">
+            <h3 class="text-xl font-bold text-white mb-6">Lịch sử đăng ký</h3>
+            <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                        <tr>
+                            <th class="px-6 py-4">Gói</th>
+                            <th class="px-6 py-4">Ngày bắt đầu</th>
+                            <th class="px-6 py-4">Ngày kết thúc</th>
+                            <th class="px-6 py-4">Số tiền</th>
+                            <th class="px-6 py-4">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        <tr th:each="sub : ${history}" class="hover:bg-slate-700/30 transition">
+                            <td class="px-6 py-4 font-bold text-white" th:text="${sub.planType}"></td>
+                            <td class="px-6 py-4 text-slate-400" th:text="${#temporals.format(sub.startDate, 'dd/MM/yyyy')}"></td>
+                            <td class="px-6 py-4 text-slate-400" th:text="${#temporals.format(sub.endDate, 'dd/MM/yyyy')}"></td>
+                            <td class="px-6 py-4 text-emerald-400 font-bold" th:text="${#numbers.formatInteger(sub.amount, 0, 'POINT')} + ' ₫'"></td>
+                            <td class="px-6 py-4">
+                                <span th:if="${sub.status == 'ACTIVE'}" class="bg-emerald-500/10 text-emerald-500 text-[10px] font-black px-2 py-1 rounded-md uppercase">Hoạt động</span>
+                                <span th:if="${sub.status == 'EXPIRED'}" class="bg-slate-500/10 text-slate-500 text-[10px] font-black px-2 py-1 rounded-md uppercase">Hết hạn</span>
+                                <span th:if="${sub.status == 'PENDING'}" class="bg-amber-500/10 text-amber-500 text-[10px] font-black px-2 py-1 rounded-md uppercase">Chờ thanh toán</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

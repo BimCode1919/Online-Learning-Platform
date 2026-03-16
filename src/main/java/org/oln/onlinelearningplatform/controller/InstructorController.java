@@ -14,6 +14,7 @@ import org.oln.onlinelearningplatform.service.aiagent.YouTubeService;
 import org.oln.onlinelearningplatform.service.course.CourseService;
 import org.oln.onlinelearningplatform.service.quiz.QuestionService;
 import org.oln.onlinelearningplatform.service.quiz.QuizService;
+import org.oln.onlinelearningplatform.service.subscription.InstructorSubscriptionService;
 import org.oln.onlinelearningplatform.service.user.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,8 +30,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/instructor")
@@ -45,6 +47,7 @@ public class InstructorController {
     private final QuizRepository quizRepository;
     private final AIQuizService aiQuizService;
     private final YouTubeService youTubeService;
+    private final InstructorSubscriptionService subscriptionService;
 
     public InstructorController(CourseService courseService,
                                 CourseRepository courseRepository,
@@ -52,7 +55,10 @@ public class InstructorController {
                                 QuizService quizService,
                                 QuestionService questionService,
                                 LessonRepository lessonRepository,
-                                QuizRepository quizRepository, AIQuizService aiQuizService, YouTubeService youTubeService) {
+                                QuizRepository quizRepository, 
+                                AIQuizService aiQuizService, 
+                                YouTubeService youTubeService,
+                                InstructorSubscriptionService subscriptionService) {
         this.courseService = courseService;
         this.courseRepository = courseRepository;
         this.userService = userService;
@@ -62,6 +68,7 @@ public class InstructorController {
         this.quizRepository = quizRepository;
         this.aiQuizService = aiQuizService;
         this.youTubeService = youTubeService;
+        this.subscriptionService = subscriptionService;
     }
 
     // Dashboard
@@ -288,16 +295,30 @@ public class InstructorController {
     @PostMapping("/generate-from-youtube")
     public String generateFromYoutube(@RequestParam("lessonId") Long lessonId,
                                       @RequestParam("youtubeUrl") String youtubeUrl,
+                                      @AuthenticationPrincipal UserDetails userDetails,
                                       RedirectAttributes redirectAttributes) {
         Long courseId = null;
         try {
+            User instructor = userService.findByEmail(userDetails.getUsername());
+            
+            // Kiểm tra subscription
+            if (!subscriptionService.hasActiveSubscription(instructor)) {
+                redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký gói Instructor Premium mới có thể dùng AI!");
+                return "redirect:/instructor/subscription/pricing";
+            }
+
             // 0. Lấy thông tin bài học để biết courseId (dùng cho việc redirect nếu lỗi)
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
             courseId = lesson.getCourse().getId();
 
-            // 1. Trích xuất Transcript từ YouTube
-            String transcript = youTubeService.getTranscript(youtubeUrl);
+            // 1. Trích xuất Video ID từ YouTube URL (Tránh gửi nguyên URL gây lỗi API)
+            String videoId = extractYoutubeId(youtubeUrl);
+            if (videoId == null || videoId.isEmpty()) {
+                throw new RuntimeException("Không trích xuất được Video ID từ URL: " + youtubeUrl);
+            }
+
+            String transcript = youTubeService.getTranscript(videoId);
 
             // 2. Gọi AI xử lý transcript và lưu vào Database
             // Lưu ý: Đảm bảo phương thức này bên Service đã xử lý convertOptions như mình đã viết
@@ -315,5 +336,18 @@ public class InstructorController {
             // Nếu có courseId thì về trang edit course, không thì về dashboard
             return (courseId != null) ? "redirect:/instructor/course/" + courseId : "redirect:/instructor/dashboard";
         }
+    }
+
+    private String extractYoutubeId(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return null;
+        }
+        String pattern = "(?<=watch\\?v=|/embed/|youtu\\.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|embed%2F|youtu\\.be%2F|%2Fv%2F)[^#&?\\n]*";
+        Pattern compiledPattern = Pattern.compile(pattern);
+        Matcher matcher = compiledPattern.matcher(url.trim());
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return url.trim(); // Trả về chính nó nếu link chỉ là ID
     }
 }

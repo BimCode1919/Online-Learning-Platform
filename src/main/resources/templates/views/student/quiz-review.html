@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Xem lại bài làm | EduStack</title>
@@ -25,14 +25,29 @@
             border: 2px solid #334155;
             transition: all 0.2s ease;
         }
-        .option-item.selected {
-            border-color: #6366f1;
-            background: linear-gradient(145deg, #4f46e5, #6366f1);
+        /* Correct but not selected */
+        .option-item.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
         }
-        .option-item.selected .option-text {
+        /* Selected and Correct */
+        .option-item.selected.correct {
+            border-color: #10b981;
+            background: linear-gradient(145deg, #059669, #10b981);
             color: white;
         }
-        .option-item.selected .option-letter {
+        /* Selected but Wrong */
+        .option-item.selected.wrong {
+            border-color: #ef4444;
+            background: linear-gradient(145deg, #dc2626, #ef4444);
+            color: white;
+        }
+        .option-item.selected.correct .option-text, 
+        .option-item.selected.wrong .option-text {
+            color: white;
+        }
+        .option-item.selected.correct .option-letter,
+        .option-item.selected.wrong .option-letter {
             background: rgba(255, 255, 255, 0.2);
             color: white;
         }
@@ -49,13 +64,10 @@
             color: #94a3b8;
             transition: all 0.2s ease;
         }
-        .badge-selected {
-            background: #6366f1;
-            color: white;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 700;
+        .explanation-box {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid #6366f1;
+            border-radius: 0 12px 12px 0;
         }
     </style>
 </head>
@@ -104,18 +116,20 @@
              class="question-card rounded-2xl p-6">
 
             <!-- Header câu hỏi -->
-            <div class="flex items-start gap-3 mb-4">
-                <span class="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                      th:text="${qIter.index + 1}"></span>
-                <h3 class="text-white font-bold text-lg" th:text="${question.questionText}">Câu hỏi</h3>
+            <div class="flex items-start justify-between gap-3 mb-4">
+                <div class="flex items-start gap-3">
+                    <span class="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                          th:text="${qIter.index + 1}"></span>
+                    <h3 class="text-white font-bold text-lg" th:text="${question.questionText}">Câu hỏi</h3>
+                </div>
             </div>
 
             <!-- Danh sách đáp án -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-10">
                 <div th:each="option, oIter : ${question.options}"
-                     th:with="isSelected = ${selectedOptionId == option.id}"
+                     th:with="isSelected = ${selectedOptionId == option.id}, isCorrect = ${option.isCorrect}"
                      class="option-item rounded-xl p-4 flex items-center gap-3"
-                     th:classappend="${isSelected ? 'selected' : ''}">
+                     th:classappend="${isSelected ? (isCorrect ? 'selected correct' : 'selected wrong') : (isCorrect ? 'correct' : '')}">
 
                     <!-- Số thứ tự option -->
                     <span class="option-letter" th:text="${oIter.index + 1}">A</span>
@@ -123,14 +137,31 @@
                     <!-- Nội dung đáp án -->
                     <span class="option-text text-slate-300 flex-1 text-sm" th:text="${option.optionText}">Đáp án</span>
 
-                    <!-- Icon đã chọn -->
-                    <span th:if="${isSelected}" class="text-white text-sm font-bold ml-auto">✓</span>
+                    <!-- Icon trạng thái -->
+                    <span th:if="${isSelected && isCorrect}" class="text-white text-sm font-bold ml-auto">✓</span>
+                    <span th:if="${isSelected && !isCorrect}" class="text-white text-sm font-bold ml-auto">✗</span>
+                    <span th:if="${!isSelected && isCorrect}" class="text-emerald-400 text-xs font-bold ml-auto">Đáp án đúng</span>
                 </div>
             </div>
 
-            <!-- Thông báo nếu chưa chọn đáp án -->
-            <div th:if="${selectedOptionId == null}" class="mt-3 ml-10 text-sm text-amber-500">
-                ⚠️ Bạn chưa chọn đáp án cho câu này
+            <!-- Giải thích & Feedback -->
+            <div class="mt-6 ml-10">
+                <!-- Thông báo nếu chưa chọn đáp án -->
+                <div th:if="${selectedOptionId == null}" class="mb-4 text-sm text-amber-500 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                    ⚠️ Bạn chưa chọn đáp án cho câu này
+                </div>
+
+                <!-- Phần giải thích của AI -->
+                <div th:if="${question.explanation != null && !question.explanation.isEmpty()}" 
+                     class="explanation-box p-4">
+                    <div class="flex items-center gap-2 mb-2 text-indigo-400">
+                        <span>💡</span>
+                        <span class="text-xs font-bold uppercase tracking-wider">Giải thích chi tiết</span>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed" th:text="${question.explanation}">
+                        Nội dung giải thích lý do tại sao đáp án đó đúng...
+                    </p>
+                </div>
             </div>
         </div>
     </div>

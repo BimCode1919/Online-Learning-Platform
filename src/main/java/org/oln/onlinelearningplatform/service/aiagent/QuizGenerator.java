@@ -1,6 +1,7 @@
 package org.oln.onlinelearningplatform.service.aiagent;
 
 import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
 
 public interface QuizGenerator {
     @UserMessage("""
@@ -20,5 +21,5 @@ public interface QuizGenerator {
           ]
         }
         """)
-    String generate(String content);
+    String generate(@V("content") String content);
 }

@@ -10,11 +10,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import org.oln.onlinelearningplatform.service.aiagent.YouTubeService;
 
-
 @Service
 public class YouTubeServiceImpl implements YouTubeService {
 
-    private final String RAPID_API_KEY = "afcf68bc40msh2d431ed0a1f0c71p179d71jsn5e230b61cd33";
+    private final String RAPID_API_KEY = "5083a44085mshc6c12535c254573p1663a6jsn2c49d653bab3";
     private final String RAPID_API_HOST = "youtube-transcript3.p.rapidapi.com";
 
     @Override

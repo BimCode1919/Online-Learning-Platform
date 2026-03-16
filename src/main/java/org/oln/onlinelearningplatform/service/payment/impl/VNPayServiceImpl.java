@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.oln.onlinelearningplatform.config.VNPayConfig;
 import org.oln.onlinelearningplatform.entity.Enrollment;
+import org.oln.onlinelearningplatform.entity.InstructorSubscription;
 import org.oln.onlinelearningplatform.service.payment.VNPayService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,24 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Override
     public String createPaymentUrl(Enrollment enrollment, HttpServletRequest request) throws UnsupportedEncodingException {
+        // Return URL for student
+        String studentReturnUrl = returnUrl; 
+        return buildUrl(enrollment.getVnpTxnRef(), enrollment.getTotalAmount(), "Thanh toan khoa hoc: " + enrollment.getVnpTxnRef(), studentReturnUrl);
+    }
+
+    @Override
+    public String createPaymentUrl(InstructorSubscription subscription, HttpServletRequest request) throws UnsupportedEncodingException {
+        // Return URL for instructor subscription
+        String instructorReturnUrl = returnUrl.replace("/student/payment-callback", "/instructor/subscription/payment-callback");
+        return buildUrl(subscription.getVnpTxnRef(), subscription.getAmount(), "Thanh toan goi Premium: " + subscription.getPlanType() + " - " + subscription.getVnpTxnRef(), instructorReturnUrl);
+    }
+
+    private String buildUrl(String txnRef, double rawAmount, String orderInfo, String customReturnUrl) throws UnsupportedEncodingException {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
 
-        // Dữ liệu từ Enrollment
-        String vnp_TxnRef = enrollment.getVnpTxnRef();
-        String vnp_IpAddr = "127.0.0.1"; // Hoặc request.getRemoteAddr()
-        long amount = (long) (enrollment.getTotalAmount() * 100);
+        long amount = (long) (rawAmount * 100);
+        String vnp_IpAddr = "127.0.0.1";
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -38,14 +50,13 @@ public class VNPayServiceImpl implements VNPayService {
         vnp_Params.put("vnp_TmnCode", tmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode", "VND");
-        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan khoa hoc: " + vnp_TxnRef);
+        vnp_Params.put("vnp_TxnRef", txnRef);
+        vnp_Params.put("vnp_OrderInfo", orderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_Locale", "vn");
-        vnp_Params.put("vnp_ReturnUrl", returnUrl);
+        vnp_Params.put("vnp_ReturnUrl", customReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        // Thời gian tạo và hết hạn (15 phút)
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
@@ -55,7 +66,6 @@ public class VNPayServiceImpl implements VNPayService {
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
-        // Sắp xếp dữ liệu
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
 
@@ -66,9 +76,6 @@ public class VNPayServiceImpl implements VNPayService {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-
-                // --- CHỈNH SỬA THEO DEMO 2.1.0 ---
-                // Theo demo mới, cả HashData và Query đều cần URLEncoder
                 hashData.append(fieldName);
                 hashData.append('=');
                 hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
@@ -85,7 +92,6 @@ public class VNPayServiceImpl implements VNPayService {
         }
 
         String queryUrl = query.toString();
-        // Băm chuỗi HashData đã được encode
         String vnp_SecureHash = VNPayConfig.hmacSHA512(hashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
 

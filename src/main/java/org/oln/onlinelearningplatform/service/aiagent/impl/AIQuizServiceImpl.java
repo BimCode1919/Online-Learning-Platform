@@ -28,6 +28,9 @@ public class AIQuizServiceImpl implements AIQuizService {
     @Override
     @Transactional
     public void createQuizFromYoutubeContent(Long lessonId, String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new RuntimeException("Không tìm thấy phụ đề (transcript) cho video này. Vui lòng thử video khác hoặc video có phụ đề.");
+        }
         String rawJson = quizGenerator.generate(content);
 
         try {
